@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail && cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+curl --fail --cookie cookies.txt https://adventofcode.com/2019/day/"$1"/input -o inputs/"$1".txt
