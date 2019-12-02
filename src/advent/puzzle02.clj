@@ -4,10 +4,7 @@
 
 (def example "1,9,10,3,2,3,11,0,99,30,40,50")
 
-(defn parse-state
-  [ns]
-  {:mem (vec ns),
-   :ip 0})
+(defn parse-state [ns] {:mem (vec ns), :ip 0})
 
 (defn next-state
   [{:keys [ip mem], :as state}]
@@ -29,13 +26,29 @@
   [v m]
   (reduce (fn [acc [k v]] (assoc acc k v)) v m))
 
+(defn run
+  [initial-state]
+  (->> (iterate next-state initial-state)
+       (take-while #(not (:halted? %)))
+       last
+       :mem
+       first))
+
 (defn solution
   []
   (let [initial-state (-> (first (u/read-csv-longs "2.txt"))
                           parse-state
-                          (update :mem patch {1 12 2 2}))]
-    (->> (iterate next-state initial-state)
-         (take-while #(not (:halted? %)))
-         last
-         :mem
-         first)))
+                          (update :mem patch {1 12, 2 2}))]
+    (run initial-state)))
+
+(defn square [n] (for [i (range n) j (range n)] [i j]))
+
+(defn solution-2
+  []
+  (let [initial-state (-> (first (u/read-csv-longs "2.txt"))
+                          parse-state)]
+    (some (fn [[noun verb]]
+            (when (= 19690720
+                     (run (update initial-state :mem patch {1 noun, 2 verb})))
+              (+ (* 100 noun) verb)))
+          (square 100))))
