@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import * as R from "ramda";
 
 function readLines(fname: string): string[] {
-  const file = readFileSync("inputs/" + fname, "utf-8");
+  const file = readFileSync("../inputs/" + fname, "utf-8");
   return R.filter((s: string) => {
     return !R.isEmpty(s);
   }, file.split(/\n/));
