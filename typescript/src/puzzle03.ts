@@ -108,6 +108,25 @@ const mdist = (point: Point, steps: Point[]): number => {
   throw new Error("Not found");
 };
 
+/**
+ * Returns the lowest value of f(x) for any x in xs
+ */
+
+const minValBy = (f: (x: any) => any, xs: any[]) =>
+  R.reduce(
+    (acc, v) => {
+      let [av, amin] = acc;
+      const d = f(v);
+      if (d < (amin as number)) {
+        return [v, d];
+      } else {
+        return acc;
+      }
+    },
+    [null, Number.MAX_VALUE],
+    xs
+  )[1];
+
 function solution() {
   const recipes = R.map(parse, example.split(/\n/));
   const paths: Segment[][] = R.map(recipe => lines(recipe), recipes);
@@ -122,37 +141,19 @@ function solution() {
       }
     }
   }
-  const closest = R.reduce(
-    (acc: [Point | null, number], v: Point): [Point | null, number] => {
-      let [av, amin] = acc;
-      const d = Math.abs(v.x) + Math.abs(v.y);
-      if (d < amin) {
-        return [v, d];
-      } else {
-        return acc;
-      }
-    },
-    [null, Number.MAX_VALUE],
+  const closest = minValBy(
+    point => Math.abs(point.x) + Math.abs(point.y),
     points
   );
-  console.log("%j", closest[1]);
+  console.log("%j", closest);
 
   const routes = R.map(recipe => allSteps(recipe), recipes);
 
-  const closest2 = R.reduce(
-    (acc: [Point | null, number], v: Point): [Point | null, number] => {
-      let [av, amin] = acc;
-      const d = mdist(v, routes[0]) + mdist(v, routes[1]);
-      if (d < amin) {
-        return [v, d];
-      } else {
-        return acc;
-      }
-    },
-    [null, Number.MAX_VALUE],
+  const closest2 = minValBy(
+    point => mdist(point, routes[0]) + mdist(point, routes[1]),
     points
   );
-  console.log("%j", closest2[1]);
+  console.log("%j", closest2);
 }
 
 export default solution;
