@@ -7,7 +7,7 @@ interface State {
 }
 
 const readInput = (): number[] =>
-  R.map(parseInt, util.readCSV("2.txt")[0]);
+  R.map(parseInt, util.readCSV("5.txt")[0]);
 
 function run(state: State) {
   while (true) {
