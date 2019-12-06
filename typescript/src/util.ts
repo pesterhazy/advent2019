@@ -14,8 +14,8 @@ const map2 = (f: (v: any) => any, a: any[][]) => R.map(b => R.map(f, b), a);
  * Returns rows of columns
  */
 
-function readCSV(fname: string): string[][] {
-  return R.map(line => line.split(/,/), readLines(fname));
+function readCSV(fname: string, sep: RegExp = /,/): string[][] {
+  return R.map(line => line.split(sep), readLines(fname));
 }
 
 export { readLines, readCSV, map2 };
