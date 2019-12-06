@@ -1,11 +1,6 @@
 import * as R from "ramda";
 import * as util from "./util";
 
-interface State {
-  ip: number;
-  mem: number[];
-}
-
 const objectFromEntries = (x: any[]) =>
   x.reduce(function(prev, curr) {
     prev[curr[0]] = curr[1];
