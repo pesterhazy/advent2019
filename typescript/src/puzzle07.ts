@@ -7,7 +7,7 @@ interface State {
 }
 
 const readInput = (): number[] =>
-  R.map(parseInt, util.readCSVString("3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0")[0]);
+  R.map(parseInt, util.readCSV("7.txt")[0]);
 
 const parseOp = (i: number): [number,number,number,number] => {
   let ret = [];
@@ -138,10 +138,8 @@ function solution() {
   let state: State = { ip: 0, mem: readInput() };
 
   let max = Number.NEGATIVE_INFINITY;
-  for ( let phases of /*permute([0,1,2,3,4])*/ [[4,3,2,1,0]] ) {
-    console.log(phases);
+  for ( let phases of permute([0,1,2,3,4]) ) {
     let result = compute(state, 0,phases);
-    console.log(result);
     if ( result > max)
       max = result;
   }
