@@ -28,9 +28,11 @@ function run(initialState: State, inputs: number[]): number {
   let output;
   let state = R.clone(initialState);
 
-  console.log("inputs", inputs);
+  // console.log("inputs", inputs);
 
   while (true) {
+    // console.log("%j", state);
+
     let { ip, mem } = state;
     let [opcode, ...modes] = parseOp(mem[ip]);
     const getv = (pn : number) =>{
@@ -62,7 +64,7 @@ function run(initialState: State, inputs: number[]): number {
         let [input, ...rest] = inputs;
         inputs = rest;
 
-        setv(2, input);
+        setv(0, input);
         state.ip += 2;
         break;
       case 4: // outp
@@ -70,7 +72,7 @@ function run(initialState: State, inputs: number[]): number {
           throw new Error("Multiple outputs");
 
         output = getv(0);
-        console.log("output",output);
+        // console.log("output",output);
         state.ip += 2;
         break;
       case 5: // jump-if-true
