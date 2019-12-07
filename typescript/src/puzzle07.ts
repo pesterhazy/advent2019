@@ -122,7 +122,12 @@ function permute(permutation: any[]) {
 }
 
 const compute = (initialState: State, input: number, phases: number[]) =>
-  R.reduce((acc:number, phase:number): number => (gen(initialState, [phase,acc]).next().value as number), 0, phases)
+  R.reduce((acc:number, phase:number): number => {
+    let g = gen(initialState);
+    g.next(); // start machine
+    g.next(phase);
+    return (g.next(acc).value as number) ;
+  }, 0, phases)
 
 function solution() {
   let state: State = { ip: 0, mem: readInput() };
