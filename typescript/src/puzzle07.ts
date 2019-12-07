@@ -98,29 +98,6 @@ function* gen(initialState: State) {
   }
 }
 
-function permute(permutation: any[]) {
-  var length = permutation.length,
-  result = [permutation.slice()],
-  c = new Array(length).fill(0),
-  i = 1, k, p;
-
-  while (i < length) {
-    if (c[i] < i) {
-      k = i % 2 && c[i];
-      p = permutation[i];
-      permutation[i] = permutation[k];
-      permutation[k] = p;
-      ++c[i];
-      i = 1;
-      result.push(permutation.slice());
-    } else {
-      c[i] = 0;
-      ++i;
-    }
-  }
-  return result;
-}
-
 const compute = (initialState: State, input: number, phases: number[]) =>
   R.reduce((acc:number, phase:number): number => {
     let g = gen(initialState);
@@ -129,26 +106,59 @@ const compute = (initialState: State, input: number, phases: number[]) =>
     return (g.next(acc).value as number) ;
   }, 0, phases)
 
+
+const compute2 = (initialState: State, input: number, phases: number[]) => {
+  let amps = R.map( phase => {
+    let g = gen(initialState);
+    g.next(); // start machine
+    g.next(phase); // initialize with phase
+    return g;
+  }, phases);
+
+  let i=0;
+  let v = input;
+  while (true) {
+    let result = amps[i].next(v); // input value
+
+    if ( result.done )
+      return v;
+
+    if ( typeof result.value !== "number" )
+      throw new Error("Unexpceted value: " + result.value);
+
+    v = result.value as number;
+
+    amps[i].next(); // move to next input
+
+    // next amp
+    i = (i + 1) % amps.length;
+  }
+}
+
 function solution() {
   let state: State = { ip: 0, mem: readInput() };
 
-  let max = Number.NEGATIVE_INFINITY;
-  for ( let phases of permute([0,1,2,3,4]) ) {
-    let result = compute(state, 0,phases);
-    if ( result > max)
-      max = result;
+  {
+    let max = Number.NEGATIVE_INFINITY;
+    for ( let phases of util.permute([0,1,2,3,4]) ) {
+        let result = compute(state, 0,phases);
+        if ( result > max)
+        max = result;
+    }
+
+    console.log("solution 1", max);
   }
 
-  console.log("max", max);
+  {
+    let max = Number.NEGATIVE_INFINITY;
+    for ( let phases of util.permute([5,6,7,8,9]) ) {
+        let result = compute2(state, 0,phases);
+        if ( result > max)
+        max = result;
+    }
+
+    console.log("solution 2", max);
+  }
 }
-
-/*
-
-- phase settings 5..9
-- multiple outputs!
-- repeatedly take input and produce output
-
-*/
-
 
 export default solution;
