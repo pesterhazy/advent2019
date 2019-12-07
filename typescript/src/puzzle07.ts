@@ -24,7 +24,7 @@ const parseOp = (i: number): [number,number,number,number] => {
   return ret as [number,number,number,number];
 }
 
-function* gen(initialState: State, inputs: number[]) {
+function* gen(initialState: State) {
   let state = R.clone(initialState);
 
   // console.log("inputs", inputs);
@@ -57,17 +57,16 @@ function* gen(initialState: State, inputs: number[]) {
         state.ip += 4;
         break;
       case 3: // inp
-        if ( inputs.length == 0 )
-          throw new Error("Out of input");
-
-        let [input, ...rest] = inputs;
-        inputs = rest;
+        let input = yield;
+        if ( input == undefined )
+          throw new Error("Invalid input: " + input);
 
         setv(0, input);
         state.ip += 2;
         break;
       case 4: // outp
-        yield getv(0);
+        let v = getv(0);
+        let r = yield v;
 
         state.ip += 2;
         break;
@@ -92,8 +91,6 @@ function* gen(initialState: State, inputs: number[]) {
         state.ip += 4;
         break;
       case 99:
-        if ( inputs.length !== 0 )
-          throw new Error("Did not consume all input");
         return;
       default:
         throw Error("Invalid opcode: " + opcode);
