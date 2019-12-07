@@ -63,8 +63,7 @@ function* gen(initialState: State) {
         state.ip += 2;
         break;
       case 4: // outp
-        let v = getv(0);
-        let r = yield v;
+        yield getv(0);
 
         state.ip += 2;
         break;
