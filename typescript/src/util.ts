@@ -18,4 +18,8 @@ function readCSV(fname: string, sep: RegExp = /,/): string[][] {
   return R.map(line => line.split(sep), readLines(fname));
 }
 
-export { readLines, readCSV, map2 };
+function readCSVString(str: string, sep: RegExp = /,/): string[][] {
+  return R.map(line => line.split(sep), str.split(/\n/));
+}
+
+export { readLines, readCSV, readCSVString, map2 };
