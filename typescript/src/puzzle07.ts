@@ -24,8 +24,7 @@ const parseOp = (i: number): [number,number,number,number] => {
   return ret as [number,number,number,number];
 }
 
-function run(initialState: State, inputs: number[]): number {
-  let output;
+function* gen(initialState: State, inputs: number[]) {
   let state = R.clone(initialState);
 
   // console.log("inputs", inputs);
@@ -68,11 +67,8 @@ function run(initialState: State, inputs: number[]): number {
         state.ip += 2;
         break;
       case 4: // outp
-        if ( output !== undefined )
-          throw new Error("Multiple outputs");
+        yield getv(0);
 
-        output = getv(0);
-        // console.log("output",output);
         state.ip += 2;
         break;
       case 5: // jump-if-true
@@ -96,12 +92,9 @@ function run(initialState: State, inputs: number[]): number {
         state.ip += 4;
         break;
       case 99:
-        if ( output === undefined )
-          throw new Error("No output yet");
-
         if ( inputs.length !== 0 )
           throw new Error("Did not consume all input");
-        return output;
+        return;
       default:
         throw Error("Invalid opcode: " + opcode);
     }
@@ -132,7 +125,7 @@ function permute(permutation: any[]) {
 }
 
 const compute = (initialState: State, input: number, phases: number[]) =>
-  R.reduce((acc:number, phase:number) => run(initialState, [phase,acc]), 0, phases)
+  R.reduce((acc:number, phase:number): number => (gen(initialState, [phase,acc]).next().value as number), 0, phases)
 
 function solution() {
   let state: State = { ip: 0, mem: readInput() };
@@ -146,5 +139,14 @@ function solution() {
 
   console.log("max", max);
 }
+
+/*
+
+- phase settings 5..9
+- multiple outputs!
+- repeatedly take input and produce output
+
+*/
+
 
 export default solution;
