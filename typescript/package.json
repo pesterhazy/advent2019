@@ -18,8 +18,10 @@
     "typescript": "^3.7.2"
   },
   "dependencies": {
+    "@types/chai": "^4.2.6",
     "@types/lodash": "^4.14.149",
     "@types/ramda": "^0.26.36",
+    "chai": "^4.2.0",
     "lodash": "^4.17.15",
     "ramda": "^0.26.1"
   }

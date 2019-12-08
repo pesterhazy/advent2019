@@ -47,4 +47,27 @@ function permute(permutation: any[]) {
   return result;
 }
 
-export { readLines, readCSV, readCSVString, map2, permute };
+const minListBy = (f: any, xs: any[]) => {
+  let a = R.reduce(
+    (a: any, b: any): any => R.minBy(v => v[0], a, b),
+    [Infinity, undefined],
+    R.map(x => [f(x), x], xs)
+  );
+
+  if (a[0] == undefined) throw new Error("Invariant violation");
+  return a[1];
+};
+
+const maxListBy = (f: any, xs: any[]) => {
+  let a = R.reduce(
+    (a: any, b: any): any => R.maxBy(v => v[0], a, b),
+    [-Infinity, undefined],
+    R.map(x => [f(x), x], xs)
+  );
+
+  if (a[0] == undefined) throw new Error("Invariant violation");
+  return a[1];
+};
+
+export { readLines, readCSV, readCSVString, map2, permute,
+         minListBy, maxListBy };

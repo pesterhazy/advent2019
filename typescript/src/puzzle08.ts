@@ -1,5 +1,6 @@
 import * as R from "ramda";
 import * as util from "./util";
+import { assert } from "chai";
 
 const WIDTH = 25;
 const HEIGHT = 6;
@@ -24,7 +25,7 @@ const readInput = (): Layer[] => {
   return layers;
 };
 
-const countChars = (needle: string, lines: Layer) =>
+const countChars = (needle: string, lines: Layer): number =>
   R.filter(
     ch => ch === needle,
     R.chain(line => Array.from(line), lines)
@@ -34,25 +35,17 @@ function solution() {
   let layers = readInput();
 
   {
-    let min = Number.POSITIVE_INFINITY;
-    let layer: Layer | undefined;
-
-    for (let lines of layers) {
-      let v = countChars("0", lines);
-
-      if (v < min) {
-        min = v;
-        layer = lines;
-      }
-    }
-
-    if (layer == undefined) throw new Error("Invariant violation");
+    let layer: Layer = util.minListBy(
+      (lines: Layer) => countChars("0", lines),
+      layers
+    );
 
     console.log(layer);
 
     let result = countChars("1", layer) * countChars("2", layer);
 
     console.log(result);
+    assert.equal(1485, result);
   }
 
   {
