@@ -38,10 +38,9 @@ function solution() {
 
   for (let lines of layers) {
     let v = countChars("0", lines);
-    console.log(v);
 
     if (v < min) {
-      v = min;
+      min = v;
       layer = lines;
     }
   }
