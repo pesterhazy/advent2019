@@ -11,7 +11,8 @@ const readInput = (): bigint[] =>
   R.map(
     s => BigInt(s),
     util.readCSVString(
-      "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99"
+      "104,1125899906842624,99"
+      // "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99"
     )[0]
   );
 
@@ -104,7 +105,7 @@ function* gen(initialState: State) {
         state.ip += 4n;
         break;
       case 9n: // setbase
-        state.base = getv(0n);
+        state.base += getv(0n);
         state.ip += 2n;
         break;
       case 99n:
