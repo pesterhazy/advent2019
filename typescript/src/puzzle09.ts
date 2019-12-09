@@ -44,13 +44,13 @@ function* gen(initialState: State) {
       // pn starts from 0
       let regval = mem[Number(ip + pn + 1n)];
       switch (modes[Number(pn)]) {
-        case 0n:
+        case 0n: // positional
           r = mem[Number(regval)];
           break;
-        case 1n:
+        case 1n: // immediate
           r = regval;
           break;
-        case 2n:
+        case 2n: // relative
           r = mem[Number(state.base + regval)];
           break;
         default:
@@ -61,9 +61,17 @@ function* gen(initialState: State) {
     };
 
     const setv = (pn: bigint, v: bigint) => {
-      // pn starts from 0
       let regval = mem[Number(ip + pn + 1n)];
-      mem[Number(regval)] = v;
+      switch (modes[Number(pn)]) {
+        case 0n: // positional
+          mem[Number(regval)] = v;
+          break;
+        case 2n: // relative
+          mem[Number(state.base + regval)] = v;
+          break;
+        default:
+          throw new Error("Invalid set mode: " + modes[Number(pn)]);
+      }
     };
     switch (opcode) {
       case 1n: // add
