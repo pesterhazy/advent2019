@@ -134,7 +134,7 @@ function solution() {
   let g = gen(initialState);
   g.next();
 
-  console.log(run(g, [1n]));
+  console.log(run(g, [2n]));
 }
 
 export default solution;
