@@ -7,6 +7,9 @@ interface State {
   mem: bigint[];
 }
 
+// const readInput = (): bigint[] =>
+//   R.map(s => BigInt(s), util.readCSV("9.txt")[0]);
+
 const readInput = (): bigint[] =>
   R.map(s => BigInt(s), util.readCSV("9.txt")[0]);
 
@@ -73,13 +76,15 @@ function* gen(initialState: State) {
         break;
       case 3n: // inp
         let input = yield;
-        if (input == undefined) throw new Error("Invalid input: " + input);
+        if (typeof input !== "bigint")
+          throw new Error("Invalid input: " + input);
 
         setv(0n, input);
         state.ip += 2n;
         break;
       case 4n: // outp
-        yield getv(0n);
+        let ret = yield getv(0n);
+        if (ret != undefined) throw new Error("Unexpected yield value" + ret);
 
         state.ip += 2n;
         break;
