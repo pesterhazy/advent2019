@@ -8,13 +8,7 @@ interface State {
 }
 
 const readInput = (): bigint[] =>
-  R.map(
-    s => BigInt(s),
-    util.readCSVString(
-      // "104,1125899906842624,99"
-      "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99"
-    )[0]
-  );
+  R.map(s => BigInt(s), util.readCSV("9.txt")[0]);
 
 const parseOp = (i: bigint): [bigint, bigint, bigint, bigint] => {
   let ret = [];
@@ -54,7 +48,7 @@ function* gen(initialState: State) {
           r = regval;
           break;
         case 2n:
-          r = state.base + regval;
+          r = mem[Number(state.base + regval)];
           break;
         default:
           throw new Error("Invalid mode");
@@ -117,11 +111,17 @@ function* gen(initialState: State) {
   }
 }
 
+function run(g: any, inputs: bigint[]): bigint[] {
+  let results = inputs.map(input => g.next(input).value);
+  return [...results, ...Array.from(g)];
+}
+
 function solution() {
   let initialState: State = { ip: 0n, base: 0n, mem: readInput() };
-
   let g = gen(initialState);
-  console.log(Array.from(g));
+  g.next();
+
+  console.log(run(g, [1n]));
 }
 
 export default solution;
