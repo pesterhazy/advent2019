@@ -33,8 +33,6 @@ function solution() {
   let height = result.length;
   console.log(result);
   console.log(width, height);
-
-  console.log(between([0, 0], [-1, -2], [-2, -4]));
 }
 
 export default solution;
