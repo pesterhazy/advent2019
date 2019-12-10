@@ -20,6 +20,8 @@ const approxeq = (v1: number, v2: number) => {
   return Math.abs(v1 - v2) < epsilon;
 };
 
+const eq = (a: Vector, b: Vector): boolean => a[0] == b[0] && a[1] == b[1];
+
 const between = (p1: Vector, p2: Vector, p3: Vector): boolean => {
   let a = sub(p2, p1);
   let b = sub(p3, p1);
@@ -29,10 +31,33 @@ const between = (p1: Vector, p2: Vector, p3: Vector): boolean => {
 
 function solution() {
   let result = readInput();
-  let width = result[0].length;
-  let height = result.length;
-  console.log(result);
-  console.log(width, height);
+  let ps: Vector[] = [];
+
+  for (let [y, line] of result.entries()) {
+    for (let [x, ch] of line.entries()) {
+      if (ch === "#") ps.push([x, y]);
+    }
+  }
+
+  let max = 0;
+  for (let p1 of ps) {
+    let n = 0;
+    for (let p3 of ps) {
+      if (eq(p1, p3)) continue;
+      let blocked = false;
+      for (let p2 of ps) {
+        if (eq(p2, p3)) continue;
+        if (eq(p2, p1)) continue;
+        if (between(p1, p2, p3)) {
+          blocked = true;
+          break;
+        }
+      }
+      if (!blocked) n++;
+    }
+    if (n > max) max = n;
+  }
+  console.log(max);
 }
 
 export default solution;
