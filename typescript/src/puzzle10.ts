@@ -71,9 +71,11 @@ function solution() {
         found = p1;
       }
     }
-    console.log(max);
+    console.log("solution 1", max);
     me = found as Vector;
   }
+
+  console.log("me: %j", me);
 
   {
     // remove myself
@@ -86,13 +88,16 @@ function solution() {
       let min = Infinity;
       let search: Vector | undefined;
       for (let p of ps) {
-        let degs = angle(dir, sub(me, p));
+        let degs = angle(dir, sub(p, me));
 
         // unless we're in the first run, plae
         // direct hit last
         if (n > 0 && degs === 0) degs = 360;
 
-        if (degs < min) {
+        if (
+          degs < min ||
+          (degs === min && search && mag(sub(p, me)) < mag(sub(search, me)))
+        ) {
           search = p;
           min = degs;
         }
@@ -101,7 +106,7 @@ function solution() {
       let target = search as Vector;
       n++;
       if (n === 200) {
-        console.log("RESULT", target[0] * 100 + target[1]);
+        console.log("solution 2", target[0] * 100 + target[1]);
         return;
       }
       // remove target
