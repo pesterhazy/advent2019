@@ -31,9 +31,7 @@ const between = (p1: Vector, p2: Vector, p3: Vector): boolean => {
 
 const angle = (a: Vector, b: Vector): number => {
   let x = Math.atan2(a[1], a[0]) - Math.atan2(b[1], b[0]);
-  let result = 360 - ((x > 0 ? x : 2 * Math.PI + x) * 360) / (2 * Math.PI);
-  if (result == 0) return 360;
-  else return result;
+  return 360 - ((x > 0 ? x : 2 * Math.PI + x) * 360) / (2 * Math.PI);
 };
 
 function solution() {
@@ -46,45 +44,71 @@ function solution() {
     }
   }
 
-  // console.log("count", ps.length);
+  let me: Vector;
+  {
+    let found;
+    let max = 0;
+    for (let p1 of ps) {
+      let n = 0;
+      // try all other asteroids
+      for (let p3 of ps) {
+        if (eq(p1, p3)) continue;
 
-  // let max = 0;
-  // for (let p1 of ps) {
-  //   let n = 0;
-  //   // try all other asteroids
-  //   for (let p3 of ps) {
-  //     if (eq(p1, p3)) continue;
+        // is any p2 between p1 and p3?
+        let blocked = false;
+        for (let p2 of ps) {
+          if (eq(p2, p3)) continue;
+          if (eq(p2, p1)) continue;
+          if (between(p1, p2, p3)) {
+            blocked = true;
+            break;
+          }
+        }
+        if (!blocked) n++;
+      }
+      if (n > max) {
+        max = n;
+        found = p1;
+      }
+    }
+    console.log(max);
+    me = found as Vector;
+  }
 
-  //     // is any p2 between p1 and p3?
-  //     let blocked = false;
-  //     for (let p2 of ps) {
-  //       if (eq(p2, p3)) continue;
-  //       if (eq(p2, p1)) continue;
-  //       if (between(p1, p2, p3)) {
-  //         blocked = true;
-  //         break;
-  //       }
-  //     }
-  //     if (!blocked) n++;
-  //   }
-  //   if (n > max) max = n;
-  // }
-  // console.log(max);
+  {
+    // remove myself
 
-  let a: Vector = [0, -1];
-  let bs: Vector[] = [
-    [0, -1],
-    [1, -1],
-    [1, 0],
-    [1, 1],
-    [0, 1],
-    [-1, 1],
-    [-1, 0],
-    [-1, -1],
-    [-0.1, -1]
-  ];
-  for (let b of bs) {
-    console.log(angle(a, b));
+    ps = R.reject(a => eq(a, me), ps);
+
+    let n = 0;
+    let dir: Vector = [0, -1];
+    while (ps.length > 0) {
+      let min = Infinity;
+      let search: Vector | undefined;
+      for (let p of ps) {
+        let degs = angle(dir, sub(me, p));
+
+        // unless we're in the first run, plae
+        // direct hit last
+        if (n > 0 && degs === 0) degs = 360;
+
+        if (degs < min) {
+          search = p;
+          min = degs;
+        }
+      }
+      if (search == undefined) throw new Error("Invariant violation");
+      let target = search as Vector;
+      n++;
+      if (n === 200) {
+        console.log("RESULT", target[0] * 100 + target[1]);
+        return;
+      }
+      // remove target
+      ps = R.reject(a => a[0] === target[0] && a[1] === target[1], ps);
+
+      dir = sub(target, me);
+    }
   }
 }
 
