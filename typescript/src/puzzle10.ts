@@ -15,7 +15,7 @@ const norm = (a: Vector): Vector => {
 };
 const dop = (a: Vector, b: Vector): number => dot(norm(a), norm(b));
 const sub = (a: Vector, b: Vector): Vector => [a[0] - b[0], a[1] - b[1]];
-const epsilon = 0.001;
+const epsilon = 0.000000001;
 const approxeq = (v1: number, v2: number) => {
   return Math.abs(v1 - v2) < epsilon;
 };
@@ -39,11 +39,16 @@ function solution() {
     }
   }
 
+  console.log("count", ps.length);
+
   let max = 0;
   for (let p1 of ps) {
     let n = 0;
+    // try all other asteroids
     for (let p3 of ps) {
       if (eq(p1, p3)) continue;
+
+      // is any p2 between p1 and p3?
       let blocked = false;
       for (let p2 of ps) {
         if (eq(p2, p3)) continue;
