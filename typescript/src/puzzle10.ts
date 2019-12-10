@@ -29,40 +29,63 @@ const between = (p1: Vector, p2: Vector, p3: Vector): boolean => {
   return mag(b) > mag(a) && approxeq(dop(a, b), 1);
 };
 
+const angle = (a: Vector, b: Vector): number => {
+  let x = Math.atan2(a[1], a[0]) - Math.atan2(b[1], b[0]);
+  let result = 360 - ((x > 0 ? x : 2 * Math.PI + x) * 360) / (2 * Math.PI);
+  if (result == 0) return 360;
+  else return result;
+};
+
 function solution() {
-  let result = readInput();
+  let input = readInput();
   let ps: Vector[] = [];
 
-  for (let [y, line] of result.entries()) {
+  for (let [y, line] of input.entries()) {
     for (let [x, ch] of line.entries()) {
       if (ch === "#") ps.push([x, y]);
     }
   }
 
-  console.log("count", ps.length);
+  // console.log("count", ps.length);
 
-  let max = 0;
-  for (let p1 of ps) {
-    let n = 0;
-    // try all other asteroids
-    for (let p3 of ps) {
-      if (eq(p1, p3)) continue;
+  // let max = 0;
+  // for (let p1 of ps) {
+  //   let n = 0;
+  //   // try all other asteroids
+  //   for (let p3 of ps) {
+  //     if (eq(p1, p3)) continue;
 
-      // is any p2 between p1 and p3?
-      let blocked = false;
-      for (let p2 of ps) {
-        if (eq(p2, p3)) continue;
-        if (eq(p2, p1)) continue;
-        if (between(p1, p2, p3)) {
-          blocked = true;
-          break;
-        }
-      }
-      if (!blocked) n++;
-    }
-    if (n > max) max = n;
+  //     // is any p2 between p1 and p3?
+  //     let blocked = false;
+  //     for (let p2 of ps) {
+  //       if (eq(p2, p3)) continue;
+  //       if (eq(p2, p1)) continue;
+  //       if (between(p1, p2, p3)) {
+  //         blocked = true;
+  //         break;
+  //       }
+  //     }
+  //     if (!blocked) n++;
+  //   }
+  //   if (n > max) max = n;
+  // }
+  // console.log(max);
+
+  let a: Vector = [0, -1];
+  let bs: Vector[] = [
+    [0, -1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+    [0, 1],
+    [-1, 1],
+    [-1, 0],
+    [-1, -1],
+    [-0.1, -1]
+  ];
+  for (let b of bs) {
+    console.log(angle(a, b));
   }
-  console.log(max);
 }
 
 export default solution;
