@@ -124,9 +124,7 @@ function* gen(initialState: State) {
   }
 }
 
-function solution() {
-  let initialState: State = { ip: 0n, base: 0n, mem: readInput() };
-
+function run(initialState: State, initialCanvas: number[][]) {
   let g = gen(initialState);
   let dir = 0; // UP
   const delta = [
@@ -136,7 +134,9 @@ function solution() {
     [-1, 0]
   ];
   let pos = [0, 0];
-  let canvas: Map<string, number> = new Map();
+  let canvas: Map<string, number> = new Map(
+    initialCanvas.map(([x, y, v]) => [JSON.stringify([x, y]), v])
+  );
   var countOutputs = 0;
   let r = g.next();
   while (true) {
@@ -173,7 +173,20 @@ function solution() {
         throw new Error("Invalid type");
     }
   }
-  console.log("solution", canvas.size);
+  return canvas;
+}
+
+function solution() {
+  let initialState: State = { ip: 0n, base: 0n, mem: readInput() };
+
+  {
+    let canvas = run(initialState, []);
+    console.log("solution", canvas.size);
+  }
+  {
+    let canvas = run(initialState, [[0, 0, 1]]);
+    console.log("solution", canvas.size);
+  }
 }
 
 export default solution;
