@@ -173,19 +173,32 @@ function run(initialState: State, initialCanvas: number[][]) {
         throw new Error("Invalid type");
     }
   }
-  return canvas;
+  let result = [];
+  for (let entry of canvas.entries()) {
+    result.push([...JSON.parse(entry[0]), entry[1]]);
+  }
+  return result;
 }
 
 function solution() {
   let initialState: State = { ip: 0n, base: 0n, mem: readInput() };
 
   {
-    let canvas = run(initialState, []);
-    console.log("solution", canvas.size);
+    let points = run(initialState, []);
+    console.log("solution", points.length);
   }
   {
-    let canvas = run(initialState, [[0, 0, 1]]);
-    console.log("solution", canvas.size);
+    let points = run(initialState, [[0, 0, 1]]);
+    let lines: number[][] = [];
+    for (let [x, y, v] of points) {
+      lines[y] = lines[y] || [];
+      lines[y][x] = v;
+    }
+    for (let line of lines) {
+      let s = "";
+      for (let n of line) s += n === 1 ? "#" : " ";
+      console.log(s);
+    }
   }
 }
 
