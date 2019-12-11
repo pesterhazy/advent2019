@@ -146,7 +146,6 @@ function solution() {
       case "in":
         let v = canvas.get(JSON.stringify(pos));
         if (v == undefined) v = 0;
-        console.log("in", v);
         r = g.next(BigInt(v));
         break;
       case "out":
@@ -168,12 +167,13 @@ function solution() {
           pos = [pos[0] + delta[dir][0], pos[1] + delta[dir][1]];
         }
         countOutputs++;
-        g.next();
+        r = g.next();
         break;
       default:
         throw new Error("Invalid type");
     }
   }
+  console.log("solution", canvas.size);
 }
 
 export default solution;
