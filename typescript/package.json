@@ -20,9 +20,11 @@
   "dependencies": {
     "@types/chai": "^4.2.6",
     "@types/lodash": "^4.14.149",
+    "@types/mathjs": "^6.0.2",
     "@types/ramda": "^0.26.36",
     "chai": "^4.2.0",
     "lodash": "^4.17.15",
+    "mathjs": "^6.2.5",
     "ramda": "^0.26.1"
   }
 }
