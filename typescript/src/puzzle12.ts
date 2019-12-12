@@ -51,11 +51,23 @@ function applyGravity(m: Moon, others: Moon[]) {
   }
 }
 
+function applyVelocity(m: Moon) {
+  m.pos = math.add(m.pos, m.vel) as math.Matrix;
+}
+
 function solution() {
   let moons: Moon[] = readInput();
-  applyGravity(moons[0], [moons[1], moons[2], moons[3]]);
-  for (let moon of moons) {
-    console.log(moon.vel.valueOf());
+  for (let i = 0; i < 10; i++) {
+    console.log("step", i);
+    applyGravity(moons[0], [moons[1], moons[2], moons[3]]);
+    applyGravity(moons[1], [moons[0], moons[2], moons[3]]);
+    applyGravity(moons[2], [moons[0], moons[1], moons[3]]);
+    applyGravity(moons[3], [moons[0], moons[1], moons[2]]);
+    for (let moon of moons) {
+      applyVelocity(moon);
+      console.log("pos", moon.pos.valueOf());
+      console.log("vel", moon.vel.valueOf());
+    }
   }
 }
 
