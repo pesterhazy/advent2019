@@ -110,7 +110,9 @@ function solution() {
         sumKin += kin;
         sumTot += tot;
       }
-      if (0 === i % 1000) console.log(i);
+      if (0 === i % 1000) {
+        console.log(i, "\t", sumPot, "\t", sumKin, "\t", sumTot);
+      }
       if (seen.has(ser(moons))) {
         console.log("FOUND", i, sumTot);
         console.log(i, "\t", sumPot, "\t", sumKin, "\t", sumTot);
