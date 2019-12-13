@@ -2,30 +2,27 @@ import * as R from "ramda";
 import * as util from "./util";
 
 interface State {
-  ip: bigint;
-  base: bigint;
-  mem: bigint[];
+  ip: number;
+  base: number;
+  mem: number[];
 }
 
-// const readInput = (): bigint[] =>
-//   R.map(s => BigInt(s), util.readCSV("9.txt")[0]);
+const readInput = (): number[] =>
+  R.map(s => parseInt(s), util.readCSV("13.txt")[0]);
 
-const readInput = (): bigint[] =>
-  R.map(s => BigInt(s), util.readCSV("13.txt")[0]);
-
-const parseOp = (i: bigint): [bigint, bigint, bigint, bigint] => {
+const parseOp = (i: number): [number, number, number, number] => {
   let ret = [];
 
-  ret.push(i % 100n);
-  i = i / 100n;
-  ret.push(i % 10n);
-  i = i / 10n;
-  ret.push(i % 10n);
-  i = i / 10n;
-  ret.push(i % 10n);
-  i = i / 10n;
+  ret.push(i % 100);
+  i = Math.floor(i / 100);
+  ret.push(i % 10);
+  i = Math.floor(i / 10);
+  ret.push(i % 10);
+  i = Math.floor(i / 10);
+  ret.push(i % 10);
+  i = Math.floor(i / 10);
 
-  return ret as [bigint, bigint, bigint, bigint];
+  return ret as [number, number, number, number];
 };
 
 function* gen(initialState: State) {
@@ -35,88 +32,90 @@ function* gen(initialState: State) {
 
   while (true) {
     let { ip, mem } = state;
-    let [opcode, ...modes] = parseOp(mem[Number(ip)]);
+    let [opcode, ...modes] = parseOp(mem[ip]);
 
     // console.log(opcode, state);
 
     let r;
-    const getv = (pn: bigint): bigint => {
+    const getv = (pn: number): number => {
       // pn starts from 0
-      let regval = mem[Number(ip + pn + 1n)];
-      switch (modes[Number(pn)]) {
-        case 0n: // positional
-          r = mem[Number(regval)];
+      let regval = mem[ip + pn + 1];
+      let mode = modes[pn];
+      switch (mode) {
+        case 0: // positional
+          r = mem[regval];
           break;
-        case 1n: // immediate
+        case 1: // immediate
           r = regval;
           break;
-        case 2n: // relative
-          r = mem[Number(state.base + regval)];
+        case 2: // relative
+          r = mem[state.base + regval];
           break;
         default:
-          throw new Error("Invalid mode");
+          throw new Error("Invalid mode: " + mode);
       }
-      if (r == undefined) return 0n;
+      if (r == undefined) return 0;
       else return r;
     };
 
-    const setv = (pn: bigint, v: bigint) => {
-      let regval = mem[Number(ip + pn + 1n)];
-      switch (modes[Number(pn)]) {
-        case 0n: // positional
-          mem[Number(regval)] = v;
+    const setv = (pn: number, v: number) => {
+      let regval = mem[ip + pn + 1];
+      switch (modes[pn]) {
+        case 0: // positional
+          mem[regval] = v;
           break;
-        case 2n: // relative
-          mem[Number(state.base + regval)] = v;
+        case 2: // relative
+          mem[state.base + regval] = v;
           break;
         default:
-          throw new Error("Invalid set mode: " + modes[Number(pn)]);
+          throw new Error("Invalid set mode: " + modes[pn]);
       }
     };
     switch (opcode) {
-      case 1n: // add
-        setv(2n, getv(0n) + getv(1n));
-        state.ip += 4n;
+      case 1: // add
+        setv(2, getv(0) + getv(1));
+        state.ip += 4;
         break;
-      case 2n: // mult
-        setv(2n, getv(0n) * getv(1n));
-        state.ip += 4n;
+      case 2: // mult
+        setv(2, getv(0) * getv(1));
+        state.ip += 4;
         break;
-      case 3n: // inp
+      case 3: // inp
         let input = yield { type: "in" };
-        if (typeof input !== "bigint")
-          throw new Error("Invalid input: " + input);
-
-        setv(0n, input);
-        state.ip += 2n;
+        if (typeof input !== "number") {
+          console.log("PREMATURE END OF INPUT");
+          return;
+        }
+        setv(0, input);
+        state.ip += 2;
         break;
-      case 4n: // outp
-        let ret = yield { type: "out", value: getv(0n) };
+      case 4: // outp
+        let ret = yield { type: "out", value: getv(0) };
         if (ret != undefined) throw new Error("Unexpected yield value" + ret);
 
-        state.ip += 2n;
+        state.ip += 2;
         break;
-      case 5n: // jump-if-true
-        if (getv(0n) !== 0n) state.ip = getv(1n);
-        else state.ip += 3n;
+      case 5: // jump-if-true
+        if (getv(0) !== 0) state.ip = getv(1);
+        else state.ip += 3;
         break;
-      case 6n: // jump-if-false
-        if (getv(0n) === 0n) state.ip = getv(1n);
-        else state.ip += 3n;
+      case 6: // jump-if-false
+        if (getv(0) === 0) state.ip = getv(1);
+        else state.ip += 3;
         break;
-      case 7n: // lt
-        setv(2n, getv(0n) < getv(1n) ? 1n : 0n);
-        state.ip += 4n;
+      case 7: // lt
+        setv(2, getv(0) < getv(1) ? 1 : 0);
+        state.ip += 4;
         break;
-      case 8n: // eq
-        setv(2n, getv(0n) === getv(1n) ? 1n : 0n);
-        state.ip += 4n;
+      case 8: // eq
+        setv(2, getv(0) === getv(1) ? 1 : 0);
+        state.ip += 4;
         break;
-      case 9n: // setbase
-        state.base += getv(0n);
-        state.ip += 2n;
+      case 9: // setbase
+        state.base += getv(0);
+        state.ip += 2;
         break;
-      case 99n:
+      case 99:
         return;
       default:
         throw Error("Invalid opcode: " + opcode);
@@ -125,23 +124,61 @@ function* gen(initialState: State) {
 }
 
 function run(initialState: State) {
-  let g = gen(initialState);
+  let state = R.clone(initialState);
+  state.mem[0] = 2;
+  let g = gen(state);
 
-  let seen = new Set();
+  let m = new Map();
 
   let triples = R.splitEvery(
     3,
     R.map(v => v.value, Array.from(g))
   );
-  for (let [x, y, tid] of triples) {
-    if (tid === 2n) seen.add(`${x},${y}`);
-    if (tid === 0n) seen.delete(`${x},${y}`);
+  let width = 0,
+    height = 0;
+  for (let triple of triples) {
+    let [x, y, tid] = triple;
+    if (x == undefined || y == undefined) {
+      console.log("WARNING: invalid x,y");
+      break; // FIXME
+    }
+    m.set(`${x},${y}`, tid);
+    width = Math.max(width, x);
+    height = Math.max(height, y);
   }
-  return seen.size;
+
+  for (let y = 0; y < height; y++) {
+    let line = "";
+    for (let x = 0; x < width; x++) {
+      let ch = " ";
+      switch (m.get(`${x},${y}`)) {
+        case undefined:
+        case 0:
+          ch = " ";
+          break;
+        case 1:
+          ch = "#";
+          break;
+        case 2:
+          ch = "x";
+          break;
+        case 3:
+          ch = "-";
+          break;
+        case 4:
+          ch = "o";
+          break;
+        default:
+          throw new Error("Invalid tile id");
+      }
+      line += ch;
+    }
+    console.log(line);
+  }
 }
 
 function solution() {
-  let initialState: State = { ip: 0n, base: 0n, mem: readInput() };
+  let initialState: State = { ip: 0, base: 0, mem: readInput() };
 
   console.log(run(initialState));
 }
