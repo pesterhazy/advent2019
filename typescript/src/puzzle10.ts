@@ -44,76 +44,74 @@ function solution() {
     }
   }
 
-  let me: Vector;
-  {
-    let found;
-    let max = 0;
-    for (let p1 of ps) {
-      let n = 0;
-      // try all other asteroids
-      for (let p3 of ps) {
-        if (eq(p1, p3)) continue;
+  let me = ps[0];
+  let max = 0;
+  for (let p1 of ps) {
+    let n = 0;
+    // try all other asteroids
+    for (let p3 of ps) {
+      if (eq(p1, p3)) continue;
 
-        // is any p2 between p1 and p3?
-        let blocked = false;
-        for (let p2 of ps) {
-          if (eq(p2, p3)) continue;
-          if (eq(p2, p1)) continue;
-          if (between(p1, p2, p3)) {
-            blocked = true;
-            break;
-          }
+      // is any p2 between p1 and p3?
+      let blocked = false;
+      for (let p2 of ps) {
+        if (eq(p2, p3)) continue;
+        if (eq(p2, p1)) continue;
+        if (between(p1, p2, p3)) {
+          blocked = true;
+          break;
         }
-        if (!blocked) n++;
       }
-      if (n > max) {
-        max = n;
-        found = p1;
-      }
+      if (!blocked) n++;
     }
-    console.log("solution 1", max);
-    me = found as Vector;
+    if (n > max) {
+      max = n;
+      me = p1;
+    }
   }
+  console.log("solution 1", max);
 
   console.log("me: %j", me);
 
-  {
-    // remove myself
+  if (!me) {
+    throw new Error("Invariant violation");
+  }
 
-    ps = R.reject(a => eq(a, me), ps);
+  // remove myself
 
-    let n = 0;
-    let dir: Vector = [0, -1];
-    while (ps.length > 0) {
-      let min = Infinity;
-      let search: Vector | undefined;
-      for (let p of ps) {
-        let degs = angle(dir, sub(p, me));
+  ps = R.reject(a => eq(a, me), ps);
 
-        // unless we're in the first run, plae
-        // direct hit last
-        if (n > 0 && degs === 0) degs = 360;
+  let n = 0;
+  let dir: Vector = [0, -1];
+  while (ps.length > 0) {
+    let min = Infinity;
+    let search: Vector | undefined;
+    for (let p of ps) {
+      let degs = angle(dir, sub(p, me));
 
-        if (
-          degs < min ||
-          (degs === min && search && mag(sub(p, me)) < mag(sub(search, me)))
-        ) {
-          search = p;
-          min = degs;
-        }
+      // unless we're in the first run, plae
+      // direct hit last
+      if (n > 0 && degs === 0) degs = 360;
+
+      if (
+        degs < min ||
+        (degs === min && search && mag(sub(p, me)) < mag(sub(search, me)))
+      ) {
+        search = p;
+        min = degs;
       }
-      if (search == undefined) throw new Error("Invariant violation");
-      let target = search as Vector;
-      n++;
-      if (n === 200) {
-        console.log("solution 2", target[0] * 100 + target[1]);
-        return;
-      }
-      // remove target
-      ps = R.reject(a => a[0] === target[0] && a[1] === target[1], ps);
-
-      dir = sub(target, me);
     }
+    if (search == undefined) throw new Error("Invariant violation");
+    let target = search as Vector;
+    n++;
+    if (n === 200) {
+      console.log("solution 2", target[0] * 100 + target[1]);
+      return;
+    }
+    // remove target
+    ps = R.reject(a => a[0] === target[0] && a[1] === target[1], ps);
+
+    dir = sub(target, me);
   }
 }
 
