@@ -22,9 +22,11 @@
     "@types/lodash": "^4.14.149",
     "@types/mathjs": "^6.0.2",
     "@types/ramda": "^0.26.36",
+    "@types/readline-sync": "^1.4.3",
     "chai": "^4.2.0",
     "lodash": "^4.17.15",
     "mathjs": "^6.2.5",
-    "ramda": "^0.26.1"
+    "ramda": "^0.26.1",
+    "readline-sync": "^1.4.10"
   }
 }

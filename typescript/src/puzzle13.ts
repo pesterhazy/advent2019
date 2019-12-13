@@ -1,5 +1,7 @@
 import * as R from "ramda";
+import * as readlineSync from "readline-sync";
 import * as util from "./util";
+import * as readline from "readline";
 
 interface State {
   ip: number;
@@ -131,10 +133,10 @@ function run(initialState: State) {
   let width = 0,
     height = 0;
   let m = new Map();
+  let score = 0;
 
+  let v = g.next();
   while (true) {
-    let v = g.next();
-
     if (v.done) break;
 
     if ((v.value as any).type == "out") {
@@ -146,10 +148,20 @@ function run(initialState: State) {
         console.log("WARNING: invalid x,y");
         break; // FIXME
       }
-      m.set(`${x},${y}`, tid);
-      width = Math.max(width, x);
-      height = Math.max(height, y);
+      if (x === -1 || y === 0) {
+        score = tid;
+      } else {
+        m.set(`${x},${y}`, tid);
+        width = Math.max(width, x);
+        height = Math.max(height, y);
+      }
+      v = g.next();
     } else if ((v.value as any).type == "in") {
+      const blank = "\n".repeat(process.stdout.rows);
+      console.log(blank);
+      readline.cursorTo(process.stdout, 0, 0);
+      readline.clearScreenDown(process.stdout);
+      console.log("SCORE:", score);
       for (let y = 0; y < height; y++) {
         let line = "";
         for (let x = 0; x < width; x++) {
@@ -178,7 +190,25 @@ function run(initialState: State) {
         }
         console.log(line);
       }
-      throw new Error("boom");
+      while (true) {
+        let key = readlineSync.keyIn();
+        let provide = undefined;
+        switch (key) {
+          case "j":
+            provide = -1;
+            break;
+          case "k":
+            provide = 0;
+            break;
+          case "l":
+            provide = 1;
+            break;
+        }
+        if (provide != undefined) {
+          v = g.next(provide);
+          break;
+        }
+      }
     } else throw new Error("Invalid generator value: " + JSON.stringify(v));
   }
 }
