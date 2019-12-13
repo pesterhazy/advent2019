@@ -130,57 +130,72 @@ function run(initialState: State) {
 
   let m = new Map();
 
-  let triples = R.splitEvery(
-    3,
-    R.map(v => v.value, Array.from(g))
-  );
-  let width = 0,
-    height = 0;
-  for (let triple of triples) {
-    let [x, y, tid] = triple;
-    if (x == undefined || y == undefined) {
-      console.log("WARNING: invalid x,y");
-      break; // FIXME
-    }
-    m.set(`${x},${y}`, tid);
-    width = Math.max(width, x);
-    height = Math.max(height, y);
-  }
+  while (true) {
+    let v = g.next();
 
-  for (let y = 0; y < height; y++) {
-    let line = "";
-    for (let x = 0; x < width; x++) {
-      let ch = " ";
-      switch (m.get(`${x},${y}`)) {
-        case undefined:
-        case 0:
-          ch = " ";
-          break;
-        case 1:
-          ch = "#";
-          break;
-        case 2:
-          ch = "x";
-          break;
-        case 3:
-          ch = "-";
-          break;
-        case 4:
-          ch = "o";
-          break;
-        default:
-          throw new Error("Invalid tile id");
-      }
-      line += ch;
-    }
-    console.log(line);
+    if (v.done) break;
+
+    if ((v.value as any).type == "out") {
+      let x = (v.value as any).value;
+      let y = (g.next().value as any).value;
+      let tid = (g.next().value as any).value;
+      console.log([x, y, tid]);
+    } else if ((v.value as any).type == "in") {
+      throw new Error("boom");
+    } else throw new Error("Invalid generator value: " + JSON.stringify(v));
+
+    // let triples = R.splitEvery(
+    //   3,
+    //   R.map(v => v.value, Array.from(g))
+    // );
+    // let width = 0,
+    //   height = 0;
+    // for (let triple of triples) {
+    //   let [x, y, tid] = triple;
+    //   if (x == undefined || y == undefined) {
+    //     console.log("WARNING: invalid x,y");
+    //     break; // FIXME
+    //   }
+    //   m.set(`${x},${y}`, tid);
+    //   width = Math.max(width, x);
+    //   height = Math.max(height, y);
+    // }
+
+    // for (let y = 0; y < height; y++) {
+    //   let line = "";
+    //   for (let x = 0; x < width; x++) {
+    //     let ch = " ";
+    //     switch (m.get(`${x},${y}`)) {
+    //       case undefined:
+    //       case 0:
+    //         ch = " ";
+    //         break;
+    //       case 1:
+    //         ch = "#";
+    //         break;
+    //       case 2:
+    //         ch = "x";
+    //         break;
+    //       case 3:
+    //         ch = "-";
+    //         break;
+    //       case 4:
+    //         ch = "o";
+    //         break;
+    //       default:
+    //         throw new Error("Invalid tile id");
+    //     }
+    //     line += ch;
+    //   }
+    //   console.log(line);
+    // }
   }
 }
 
 function solution() {
   let initialState: State = { ip: 0, base: 0, mem: readInput() };
 
-  console.log(run(initialState));
+  run(initialState);
 }
 
 export default solution;
