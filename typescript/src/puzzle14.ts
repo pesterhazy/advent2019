@@ -5,6 +5,9 @@ import * as util from "./util";
 let example =
   "9 ORE => 2 A\n8 ORE => 3 B\n7 ORE => 5 C\n3 A, 4 B => 1 AB\n5 B, 7 C => 1 BC\n4 C, 1 A => 1 CA\n2 AB, 3 BC, 4 CA => 1 FUEL";
 
+let example2 =
+  "157 ORE => 5 NZVS\n165 ORE => 6 DCFZ\n44 XJWVT, 5 KHKGT, 1 QDVJ, 29 NZVS, 9 GPVTF, 48 HKGWZ => 1 FUEL\n12 HKGWZ, 1 GPVTF, 8 PSHF => 9 QDVJ\n179 ORE => 7 PSHF\n177 ORE => 5 HKGWZ\n7 DCFZ, 7 PSHF => 2 XJWVT\n165 ORE => 2 GPVTF\n3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT";
+
 interface Recipe {
   qty: number;
   ingredients: any[];
@@ -16,7 +19,7 @@ interface Term {
 }
 
 const readInput = (): Record<string, Recipe> => {
-  const lines = example.split(/\n/);
+  const lines = example2.split(/\n/);
   if (!lines) throw new Error("Not found");
   return R.fromPairs(
     R.map((line: string) => {
@@ -83,24 +86,26 @@ function solution() {
 
   let terms = [{ qty: 1, mat: "FUEL" }];
 
-  terms = expand(input, terms);
-  console.log(terms);
-  let newTerms = [];
-  for (let term of terms) {
-    let resource = input[term.mat];
-    if (!resource) {
-      newTerms.push(term);
-    } else {
-      let ratio = Math.ceil(term.qty / resource.qty);
-      for (let ingredient of resource.ingredients) {
-        newTerms.push({ qty: ingredient.qty * ratio, mat: ingredient.mat });
+  while (true) {
+    terms = expand(input, terms);
+    console.log(terms);
+    let newTerms = [];
+    let done = true;
+    for (let term of terms) {
+      let resource = input[term.mat];
+      if (!resource) {
+        newTerms.push(term);
+      } else {
+        let ratio = Math.ceil(term.qty / resource.qty);
+        for (let ingredient of resource.ingredients) {
+          newTerms.push({ qty: ingredient.qty * ratio, mat: ingredient.mat });
+        }
+        done = false;
       }
     }
+    terms = newTerms;
+    if (done) break;
   }
-  terms = newTerms;
-  terms = simplify(terms);
-
-  console.log(terms);
 }
 
 export default solution;
