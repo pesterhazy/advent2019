@@ -43,16 +43,12 @@ function simplify(terms: Term[]) {
   return result;
 }
 
-function solution() {
-  let input = readInput();
-  console.log(JSON.stringify(input, null, 4));
-  // FUEL
-  // => ORE
-
-  let terms = [{ qty: 1, mat: "FUEL" }];
-
+function expand(input: Record<string, Recipe>, terms: Term[]) {
+  let done = false;
   while (true) {
-    console.log(terms);
+    done = true;
+    terms = simplify(terms);
+    // console.log(terms);
     let newTerms: Term[] = [];
     for (let term of terms) {
       let resource = input[term.mat];
@@ -68,13 +64,43 @@ function solution() {
           for (let ingredient of resource.ingredients) {
             newTerms.push({ qty: ingredient.qty * ratio, mat: ingredient.mat });
           }
+          done = false;
         }
       } else {
         newTerms.push(term);
       }
     }
-    terms = simplify(newTerms);
+    terms = newTerms;
+    if (done) return terms;
   }
+}
+
+function solution() {
+  let input = readInput();
+  console.log(JSON.stringify(input, null, 4));
+  // FUEL
+  // => ORE
+
+  let terms = [{ qty: 1, mat: "FUEL" }];
+
+  terms = expand(input, terms);
+  console.log(terms);
+  let newTerms = [];
+  for (let term of terms) {
+    let resource = input[term.mat];
+    if (!resource) {
+      newTerms.push(term);
+    } else {
+      let ratio = Math.ceil(term.qty / resource.qty);
+      for (let ingredient of resource.ingredients) {
+        newTerms.push({ qty: ingredient.qty * ratio, mat: ingredient.mat });
+      }
+    }
+  }
+  terms = newTerms;
+  terms = simplify(terms);
+
+  console.log(terms);
 }
 
 export default solution;
