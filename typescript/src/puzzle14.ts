@@ -28,7 +28,7 @@ interface Term {
 }
 
 const readInput = (): Record<string, Recipe> => {
-  const lines = example3.split(/\n/);
+  const lines = example.split(/\n/);
   if (!lines) throw new Error("Not found");
   return R.fromPairs(
     R.map((line: string) => {
@@ -56,9 +56,8 @@ function simplify(terms: Term[]) {
 }
 
 function expand(input: Record<string, Recipe>, terms: Term[]) {
-  let done = false;
   while (true) {
-    done = true;
+    let done = true;
     terms = simplify(terms);
     let newTerms: Term[] = [];
     for (let term of terms) {
@@ -104,7 +103,7 @@ function solve(
   path: number[]
 ): number {
   terms = expand(input, terms);
-  if (path.length < 4) {
+  if (path.length < 6) {
     console.log("**", path);
     console.log(terms);
   }
@@ -126,7 +125,19 @@ function solve(
     for (let ingredient of resource.ingredients) {
       newTerms.push({ qty: ingredient.qty * ratio, mat: ingredient.mat });
     }
-    candidates.push(simplify(newTerms));
+
+    newTerms = simplify(newTerms);
+
+    let score = Infinity;
+    for (term of newTerms) {
+      if (!input[term.qty]) {
+        score = term.qty;
+        break;
+      }
+    }
+    let candidate = { terms: newTerms, score: score };
+
+    candidates.push(candidate);
   }
   if (candidates.length === 0) {
     // Nothing left to expand
@@ -135,10 +146,16 @@ function solve(
     return terms[0].qty;
   }
 
+  candidates.sort((a, b) => {
+    if (a.score < b.score) return -1;
+    if (a.score > b.score) return 1;
+    return 0;
+  });
+
   let min = Infinity;
 
   for (let [idx, candidate] of candidates.entries()) {
-    let v = solve(input, candidate, ctx, [...path, idx]);
+    let v = solve(input, candidate.terms, ctx, [...path, idx]);
 
     if (v < min) {
       min = v;
