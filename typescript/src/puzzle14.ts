@@ -28,7 +28,7 @@ interface Term {
 }
 
 const readInput = (): Record<string, Recipe> => {
-  const lines = exampleOurs.split(/\n/);
+  const lines = example3.split(/\n/);
   if (!lines) throw new Error("Not found");
   return R.fromPairs(
     R.map((line: string) => {
@@ -101,7 +101,7 @@ function solve(
   input: Record<string, Recipe>,
   terms: Term[],
   ctx: Ctx,
-  lvl: number
+  path: number[]
 ): number {
   terms = expand(input, terms);
   let hash = JSON.stringify(terms);
@@ -133,12 +133,11 @@ function solve(
 
   let min = Infinity;
 
-  if (lvl < 2) {
-    console.log("**", lvl);
-    console.log(candidates);
+  if (path.length < 4) {
+    console.log("**", path);
   }
-  for (let candidate of candidates) {
-    let v = solve(input, candidate, ctx, lvl + 1);
+  for (let [idx, candidate] of candidates.entries()) {
+    let v = solve(input, candidate, ctx, [...path, idx]);
 
     if (v < min) {
       min = v;
@@ -158,7 +157,7 @@ function solution() {
       input,
       [{ qty: 1, mat: "FUEL" }],
       { min: Infinity, seen: new Set() },
-      0
+      []
     )
   );
 }
