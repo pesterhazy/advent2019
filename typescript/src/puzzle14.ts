@@ -115,13 +115,7 @@ function solve(input: Record<string, Recipe>, terms: Term[]): number {
 
 function solution() {
   let input = readInput();
-  console.log(JSON.stringify(input, null, 4));
-  // FUEL
-  // => ORE
-
-  let terms = [{ qty: 1, mat: "FUEL" }];
-
-  console.log(solve(input, terms));
+  console.log(solve(input, [{ qty: 1, mat: "FUEL" }]));
 }
 
 export default solution;
