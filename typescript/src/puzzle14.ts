@@ -104,6 +104,10 @@ function solve(
   path: number[]
 ): number {
   terms = expand(input, terms);
+  if (path.length < 4) {
+    console.log("**", path);
+    console.log(terms);
+  }
   let hash = JSON.stringify(terms);
   if (ctx.seen.has(hash)) {
     return Infinity;
@@ -133,9 +137,6 @@ function solve(
 
   let min = Infinity;
 
-  if (path.length < 4) {
-    console.log("**", path);
-  }
   for (let [idx, candidate] of candidates.entries()) {
     let v = solve(input, candidate, ctx, [...path, idx]);
 
