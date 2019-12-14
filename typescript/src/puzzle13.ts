@@ -133,9 +133,9 @@ function run(initialState: State, replay: number[]): number[] | undefined {
     readline.cursorTo(process.stdout, 0, 0);
     readline.clearScreenDown(process.stdout);
     console.log("SCORE:", score);
-    for (let y = 0; y < height; y++) {
+    for (let y = 0; y <= height; y++) {
       let line = "";
-      for (let x = 0; x < width; x++) {
+      for (let x = 0; x <= width; x++) {
         let ch = " ";
         switch (m.get(`${x},${y}`)) {
           case undefined:
