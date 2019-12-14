@@ -77,6 +77,42 @@ function expand(input: Record<string, Recipe>, terms: Term[]) {
   }
 }
 
+function solve(input: Record<string, Recipe>, terms: Term[]): number {
+  terms = expand(input, terms);
+  let candidates = [];
+  for (let [idx, term] of terms.entries()) {
+    let resource = input[term.mat];
+    if (!resource) {
+      continue;
+    }
+    // new Terms without current one
+    let newTerms = terms.slice(0, idx).concat(terms.slice(idx + 1));
+
+    let ratio = Math.ceil(term.qty / resource.qty);
+    for (let ingredient of resource.ingredients) {
+      newTerms.push({ qty: ingredient.qty * ratio, mat: ingredient.mat });
+    }
+    candidates.push(simplify(newTerms));
+  }
+  if (candidates.length === 0) {
+    // Nothing left to expand
+    if (terms.length !== 1) throw new Error("Expected single entry");
+
+    return terms[0].qty;
+  }
+
+  let min = Infinity;
+
+  for (let candidate of candidates) {
+    let v = solve(input, candidate);
+
+    if (v < min) {
+      min = v;
+    }
+  }
+  return min;
+}
+
 function solution() {
   let input = readInput();
   console.log(JSON.stringify(input, null, 4));
@@ -85,26 +121,7 @@ function solution() {
 
   let terms = [{ qty: 1, mat: "FUEL" }];
 
-  while (true) {
-    terms = expand(input, terms);
-    let newTerms = [];
-    let done = true;
-    for (let term of terms) {
-      let resource = input[term.mat];
-      if (!resource) {
-        newTerms.push(term);
-      } else {
-        let ratio = Math.ceil(term.qty / resource.qty);
-        for (let ingredient of resource.ingredients) {
-          newTerms.push({ qty: ingredient.qty * ratio, mat: ingredient.mat });
-        }
-        done = false;
-      }
-    }
-    terms = newTerms;
-    if (done) break;
-  }
-  console.log(terms);
+  console.log(solve(input, terms));
 }
 
 export default solution;
