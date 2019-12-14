@@ -51,7 +51,6 @@ function expand(input: Record<string, Recipe>, terms: Term[]) {
   while (true) {
     done = true;
     terms = simplify(terms);
-    // console.log(terms);
     let newTerms: Term[] = [];
     for (let term of terms) {
       let resource = input[term.mat];
@@ -88,7 +87,6 @@ function solution() {
 
   while (true) {
     terms = expand(input, terms);
-    console.log(terms);
     let newTerms = [];
     let done = true;
     for (let term of terms) {
@@ -106,6 +104,7 @@ function solution() {
     terms = newTerms;
     if (done) break;
   }
+  console.log(terms);
 }
 
 export default solution;
