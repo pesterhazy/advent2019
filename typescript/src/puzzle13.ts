@@ -1,6 +1,7 @@
 import * as R from "ramda";
 import * as readlineSync from "readline-sync";
 import * as util from "./util";
+import * as game from "./replay";
 import * as readline from "readline";
 
 interface State {
@@ -125,10 +126,48 @@ function* gen(initialState: State) {
   }
 }
 
-function run(initialState: State) {
+function run(initialState: State, replay: number[]): number[] | undefined {
+  function print() {
+    const blank = "\n".repeat(process.stdout.rows);
+    console.log(blank);
+    readline.cursorTo(process.stdout, 0, 0);
+    readline.clearScreenDown(process.stdout);
+    console.log("SCORE:", score);
+    for (let y = 0; y < height; y++) {
+      let line = "";
+      for (let x = 0; x < width; x++) {
+        let ch = " ";
+        switch (m.get(`${x},${y}`)) {
+          case undefined:
+          case 0:
+            ch = " ";
+            break;
+          case 1:
+            ch = "#";
+            break;
+          case 2:
+            ch = "x";
+            break;
+          case 3:
+            ch = "\u2594";
+            break;
+          case 4:
+            ch = "o";
+            break;
+          default:
+            throw new Error("Invalid tile id");
+        }
+        line += ch;
+      }
+      console.log(line);
+    }
+  }
   let state = R.clone(initialState);
+  replay = R.clone(replay);
   state.mem[0] = 2;
   let g = gen(state);
+
+  let history: number[] = [];
 
   let width = 0,
     height = 0;
@@ -157,66 +196,51 @@ function run(initialState: State) {
       }
       v = g.next();
     } else if ((v.value as any).type == "in") {
-      const blank = "\n".repeat(process.stdout.rows);
-      console.log(blank);
-      readline.cursorTo(process.stdout, 0, 0);
-      readline.clearScreenDown(process.stdout);
-      console.log("SCORE:", score);
-      for (let y = 0; y < height; y++) {
-        let line = "";
-        for (let x = 0; x < width; x++) {
-          let ch = " ";
-          switch (m.get(`${x},${y}`)) {
-            case undefined:
-            case 0:
-              ch = " ";
+      if (replay.length == 0) print();
+
+      let provide;
+
+      if (replay.length > 0) provide = replay.shift();
+      else
+        while (true) {
+          let key = readlineSync.keyIn();
+          switch (key) {
+            case "j":
+              provide = -1;
               break;
-            case 1:
-              ch = "#";
+            case "k":
+              provide = 0;
               break;
-            case 2:
-              ch = "x";
+            case "l":
+              provide = 1;
               break;
-            case 3:
-              ch = "-";
-              break;
-            case 4:
-              ch = "o";
-              break;
-            default:
-              throw new Error("Invalid tile id");
+            case "u":
+              return history;
           }
-          line += ch;
-        }
-        console.log(line);
-      }
-      while (true) {
-        let key = readlineSync.keyIn();
-        let provide = undefined;
-        switch (key) {
-          case "j":
-            provide = -1;
+          if (provide != undefined) {
             break;
-          case "k":
-            provide = 0;
-            break;
-          case "l":
-            provide = 1;
-            break;
+          }
         }
-        if (provide != undefined) {
-          v = g.next(provide);
-          break;
-        }
-      }
+      history.push(provide as number);
+      v = g.next(provide);
     } else throw new Error("Invalid generator value: " + JSON.stringify(v));
   }
+  print();
+  console.log("%j", history);
+  return undefined;
 }
 
 function solution() {
   let initialState: State = { ip: 0, base: 0, mem: readInput() };
 
-  run(initialState);
+  let replay: number[] = game.replay;
+
+  while (true) {
+    let history = run(initialState, replay);
+    if (!history) break;
+
+    replay = history.slice(0, Math.max(0, history.length - 3));
+  }
 }
 
 export default solution;
