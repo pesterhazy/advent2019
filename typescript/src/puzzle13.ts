@@ -208,11 +208,23 @@ function run(initialState: State, replay: number[]): number[] | undefined {
             case "j":
               provide = -1;
               break;
+            case "J":
+              provide = -1;
+              replay = [-1, -1, -1, -1];
+              break;
             case "k":
               provide = 0;
               break;
+            case "K":
+              provide = 0;
+              replay = [0, 0, 0, 0];
+              break;
             case "l":
               provide = 1;
+              break;
+            case "L":
+              provide = 1;
+              replay = [1, 1, 1, 1];
               break;
             case "u":
               return history;
@@ -239,7 +251,7 @@ function solution() {
     let history = run(initialState, replay);
     if (!history) break;
 
-    replay = history.slice(0, Math.max(0, history.length - 3));
+    replay = history.slice(0, Math.max(0, history.length - 5));
   }
 }
 
