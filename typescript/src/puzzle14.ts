@@ -10,6 +10,11 @@ interface Recipe {
   ingredients: any[];
 }
 
+interface Term {
+  qty: number;
+  mat: string;
+}
+
 const readInput = (): Record<string, Recipe> => {
   const lines = example.split(/\n/);
   if (!lines) throw new Error("Not found");
@@ -28,9 +33,48 @@ const readInput = (): Record<string, Recipe> => {
   );
 };
 
+function simplify(terms: Term[]) {
+  let materials: Record<string, number> = {};
+  for (let term of terms) {
+    materials[term.mat] = (materials[term.mat] || 0) + term.qty;
+  }
+  let result: Term[] = [];
+  for (let mat in materials) result.push({ mat: mat, qty: materials[mat] });
+  return result;
+}
+
 function solution() {
   let input = readInput();
   console.log(JSON.stringify(input, null, 4));
+  // FUEL
+  // => ORE
+
+  let terms = [{ qty: 1, mat: "FUEL" }];
+
+  while (true) {
+    console.log(terms);
+    let newTerms: Term[] = [];
+    for (let term of terms) {
+      let resource = input[term.mat];
+
+      if (resource) {
+        let ratio = Math.floor(term.qty / resource.qty);
+        let remainder = term.qty % resource.qty;
+        if (remainder !== 0) {
+          newTerms.push({ qty: remainder, mat: term.mat });
+        }
+
+        if (ratio >= 1) {
+          for (let ingredient of resource.ingredients) {
+            newTerms.push({ qty: ingredient.qty * ratio, mat: ingredient.mat });
+          }
+        }
+      } else {
+        newTerms.push(term);
+      }
+    }
+    terms = simplify(newTerms);
+  }
 }
 
 export default solution;
