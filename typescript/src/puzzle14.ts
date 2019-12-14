@@ -8,6 +8,9 @@ let example =
 let example2 =
   "157 ORE => 5 NZVS\n165 ORE => 6 DCFZ\n44 XJWVT, 5 KHKGT, 1 QDVJ, 29 NZVS, 9 GPVTF, 48 HKGWZ => 1 FUEL\n12 HKGWZ, 1 GPVTF, 8 PSHF => 9 QDVJ\n179 ORE => 7 PSHF\n177 ORE => 5 HKGWZ\n7 DCFZ, 7 PSHF => 2 XJWVT\n165 ORE => 2 GPVTF\n3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT";
 
+let example3 =
+  "171 ORE => 8 CNZTR\n7 ZLQW, 3 BMBT, 9 XCVML, 26 XMNCP, 1 WPTQ, 2 MZWV, 1 RJRHP => 4 PLWSL\n114 ORE => 4 BHXH\n14 VRPVC => 6 BMBT\n6 BHXH, 18 KTJDG, 12 WPTQ, 7 PLWSL, 31 FHTLT, 37 ZDVW => 1 FUEL\n6 WPTQ, 2 BMBT, 8 ZLQW, 18 KTJDG, 1 XMNCP, 6 MZWV, 1 RJRHP => 6 FHTLT\n15 XDBXC, 2 LTCX, 1 VRPVC => 6 ZLQW\n13 WPTQ, 10 LTCX, 3 RJRHP, 14 XMNCP, 2 MZWV, 1 ZLQW => 1 ZDVW\n5 BMBT => 4 WPTQ\n189 ORE => 9 KTJDG\n1 MZWV, 17 XDBXC, 3 XCVML => 2 XMNCP\n12 VRPVC, 27 CNZTR => 2 XDBXC\n15 KTJDG, 12 BHXH => 5 XCVML\n3 BHXH, 2 VRPVC => 7 MZWV\n121 ORE => 7 VRPVC\n7 XCVML => 6 RJRHP\n5 BHXH, 4 VRPVC => 5 LTCX";
+
 interface Recipe {
   qty: number;
   ingredients: any[];
@@ -19,7 +22,7 @@ interface Term {
 }
 
 const readInput = (): Record<string, Recipe> => {
-  const lines = example2.split(/\n/);
+  const lines = example3.split(/\n/);
   if (!lines) throw new Error("Not found");
   return R.fromPairs(
     R.map((line: string) => {
@@ -77,7 +80,11 @@ function expand(input: Record<string, Recipe>, terms: Term[]) {
   }
 }
 
-function solve(input: Record<string, Recipe>, terms: Term[]): number {
+interface Ctx {
+  min: number;
+}
+
+function solve(input: Record<string, Recipe>, terms: Term[], ctx: Ctx): number {
   terms = expand(input, terms);
   let candidates = [];
   for (let [idx, term] of terms.entries()) {
@@ -104,10 +111,14 @@ function solve(input: Record<string, Recipe>, terms: Term[]): number {
   let min = Infinity;
 
   for (let candidate of candidates) {
-    let v = solve(input, candidate);
+    let v = solve(input, candidate, ctx);
 
     if (v < min) {
       min = v;
+      if (v < ctx.min) {
+        console.log("New minimum", v);
+        ctx.min = v;
+      }
     }
   }
   return min;
@@ -115,7 +126,7 @@ function solve(input: Record<string, Recipe>, terms: Term[]): number {
 
 function solution() {
   let input = readInput();
-  console.log(solve(input, [{ qty: 1, mat: "FUEL" }]));
+  console.log(solve(input, [{ qty: 1, mat: "FUEL" }], { min: Infinity }));
 }
 
 export default solution;
