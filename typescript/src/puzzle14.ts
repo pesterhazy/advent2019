@@ -97,7 +97,12 @@ interface Ctx {
   seen: Set<string>;
 }
 
-function solve(input: Record<string, Recipe>, terms: Term[], ctx: Ctx): number {
+function solve(
+  input: Record<string, Recipe>,
+  terms: Term[],
+  ctx: Ctx,
+  lvl: number
+): number {
   terms = expand(input, terms);
   let hash = JSON.stringify(terms);
   if (ctx.seen.has(hash)) {
@@ -128,8 +133,12 @@ function solve(input: Record<string, Recipe>, terms: Term[], ctx: Ctx): number {
 
   let min = Infinity;
 
+  if (lvl < 2) {
+    console.log("**", lvl);
+    console.log(candidates);
+  }
   for (let candidate of candidates) {
-    let v = solve(input, candidate, ctx);
+    let v = solve(input, candidate, ctx, lvl + 1);
 
     if (v < min) {
       min = v;
@@ -145,7 +154,12 @@ function solve(input: Record<string, Recipe>, terms: Term[], ctx: Ctx): number {
 function solution() {
   let input = readInput();
   console.log(
-    solve(input, [{ qty: 1, mat: "FUEL" }], { min: Infinity, seen: new Set() })
+    solve(
+      input,
+      [{ qty: 1, mat: "FUEL" }],
+      { min: Infinity, seen: new Set() },
+      0
+    )
   );
 }
 
