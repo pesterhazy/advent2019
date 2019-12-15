@@ -28,7 +28,7 @@ interface Term {
 }
 
 const readInput = (): Record<string, Recipe> => {
-  const lines = example2.split(/\n/);
+  const lines = exampleOurs.split(/\n/);
   if (!lines) throw new Error("Not found");
   return R.fromPairs(
     R.map((line: string) => {
@@ -90,22 +90,21 @@ function solution() {
     if (ore >= TARGET) break;
     lower = upper;
   }
-  let n = 0;
   while (true) {
-    console.log(lower, upper);
     let fuel = Math.floor((upper + lower) / 2);
     let ore = solve(input, { FUEL: fuel });
 
-    console.log("fuel", fuel);
-    console.log("ore", ore);
     if (upper === lower) break;
 
-    if (ore < TARGET) lower = fuel;
-    else if (ore > TARGET) upper = fuel;
-    else break;
-
-    if (n++ > 100) throw new Error("boom");
+    if (ore < TARGET) {
+      if (lower == fuel) break;
+      lower = fuel;
+    } else if (ore > TARGET) {
+      if (upper === fuel) break;
+      upper = fuel;
+    } else break;
   }
+  console.log(lower);
 }
 
 export default solution;
