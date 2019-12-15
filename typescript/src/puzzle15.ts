@@ -138,6 +138,7 @@ function* gen(initialState: State) {
 
 const dx = [0, 0, -1, 1];
 const dy = [-1, 1, 0, 0];
+const invert = [-1, 2, 1, 4, 3];
 
 function run(initialState: State) {
   let g = gen(initialState);
@@ -152,12 +153,16 @@ function run(initialState: State) {
     return v.value;
   };
 
-  let n = 0;
+  let target;
   let wall = new Set();
   let seen = new Set();
   let pos = { x: 0, y: 0 };
+  let min = { x: 0, y: 0 };
+  let max = { x: 0, y: 0 };
+  let history: number[] = [];
   while (true) {
-    console.log("@", pos);
+    // console.log("@", pos);
+    let done = true;
     for (let dir of [1, 2, 3, 4]) {
       let dest = { x: pos.x + dx[dir - 1], y: pos.y + dy[dir - 1] };
 
@@ -165,28 +170,59 @@ function run(initialState: State) {
         continue;
       }
       if (seen.has(`${dest.x},${dest.y}`)) {
-        console.log("Already seen", dest);
+        continue;
       }
 
       let ret = call(dir);
-      console.log(dest, "=>", ret);
       switch (ret) {
         case 0:
           wall.add(`${dest.x},${dest.y}`);
           break;
+        case 2:
+          target = dest;
+          console.log("Found target", target);
+        // fall thru
         case 1:
           pos = dest;
-          break;
-        case 2:
-          throw new Error("Found target");
+          max.x = Math.max(max.x, pos.x);
+          max.y = Math.max(max.y, pos.x);
+          min.x = Math.min(min.x, pos.x);
+          min.y = Math.min(min.y, pos.x);
+          seen.add(`${pos.x},${pos.y}`);
+          history.push(dir);
           break;
         default:
           throw new Error("Unexpected ret");
       }
+      done = false;
       break;
     }
-    seen.add(`${pos.x},${pos.y}`);
-    if (n++ > 10) throw new Error("Boom");
+    if (done) {
+      if (history.length === 0) break;
+      let originalDir = history.pop() as number;
+      let dir = invert[originalDir];
+      let ret = call(dir);
+      if (ret !== 1) throw new Error("Unexpected ret while backtracking");
+      let dest = { x: pos.x + dx[dir - 1], y: pos.y + dy[dir - 1] };
+      pos = dest;
+    }
+  }
+  console.log(min, max);
+
+  if (target == undefined) throw new Error("No target found");
+  for (let y = min.y; y <= max.y; y++) {
+    let line = "";
+    for (let x = min.x; x <= max.x; x++) {
+      let ch;
+      if (wall.has(`${x},${y}`)) ch = "#";
+      else if (target.x === x && target.y === y) ch = "O";
+      else if (0 === x && 0 === y) ch = "@";
+      else if (seen.has(`${x},${y}`)) ch = ".";
+      else ch = " ";
+
+      line += ch;
+    }
+    console.log(line);
   }
 }
 
