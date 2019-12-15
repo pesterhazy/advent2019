@@ -173,6 +173,11 @@ function run(initialState: State) {
         continue;
       }
 
+      max.x = Math.max(max.x, dest.x);
+      max.y = Math.max(max.y, dest.x);
+      min.x = Math.min(min.x, dest.x);
+      min.y = Math.min(min.y, dest.x);
+
       let ret = call(dir);
       switch (ret) {
         case 0:
@@ -184,10 +189,6 @@ function run(initialState: State) {
         // fall thru
         case 1:
           pos = dest;
-          max.x = Math.max(max.x, pos.x);
-          max.y = Math.max(max.y, pos.x);
-          min.x = Math.min(min.x, pos.x);
-          min.y = Math.min(min.y, pos.x);
           seen.add(`${pos.x},${pos.y}`);
           history.push(dir);
           break;
