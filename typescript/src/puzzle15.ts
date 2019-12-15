@@ -180,7 +180,7 @@ function run(initialState: State) {
           break;
         case 2:
           target = dest;
-          console.log("Found target", target);
+          console.log("Found target", target, history.length + 1);
         // fall thru
         case 1:
           pos = dest;
