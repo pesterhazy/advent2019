@@ -15,6 +15,11 @@ interface Value {
   value?: number;
 }
 
+interface Point {
+  x: number;
+  y: number;
+}
+
 const readInput = (): number[] =>
   R.map(s => parseInt(s), util.readCSV("15.txt")[0]);
 
@@ -131,6 +136,9 @@ function* gen(initialState: State) {
   }
 }
 
+const dx = [0, 0, -1, 1];
+const dy = [-1, 1, 0, 0];
+
 function run(initialState: State) {
   let g = gen(initialState);
   const call = (cmd: number) => {
@@ -144,7 +152,42 @@ function run(initialState: State) {
     return v.value;
   };
 
-  console.log(call(4));
+  let n = 0;
+  let wall = new Set();
+  let seen = new Set();
+  let pos = { x: 0, y: 0 };
+  while (true) {
+    console.log("@", pos);
+    for (let dir of [1, 2, 3, 4]) {
+      let dest = { x: pos.x + dx[dir - 1], y: pos.y + dy[dir - 1] };
+
+      if (wall.has(`${dest.x},${dest.y}`)) {
+        continue;
+      }
+      if (seen.has(`${dest.x},${dest.y}`)) {
+        console.log("Already seen", dest);
+      }
+
+      let ret = call(dir);
+      console.log(dest, "=>", ret);
+      switch (ret) {
+        case 0:
+          wall.add(`${dest.x},${dest.y}`);
+          break;
+        case 1:
+          pos = dest;
+          break;
+        case 2:
+          throw new Error("Found target");
+          break;
+        default:
+          throw new Error("Unexpected ret");
+      }
+      break;
+    }
+    seen.add(`${pos.x},${pos.y}`);
+    if (n++ > 10) throw new Error("Boom");
+  }
 }
 
 function solution() {
