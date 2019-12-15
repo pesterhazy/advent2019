@@ -45,139 +45,40 @@ const readInput = (): Record<string, Recipe> => {
   );
 };
 
-function simplify(terms: Term[]) {
-  let materials: Record<string, number> = {};
-  for (let term of terms) {
-    materials[term.mat] = (materials[term.mat] || 0) + term.qty;
-  }
-  let result: Term[] = [];
-  for (let mat in materials) result.push({ mat: mat, qty: materials[mat] });
-  return result;
-}
-
-function expand(input: Record<string, Recipe>, terms: Term[]) {
+const solve = (input: Record<string, Recipe>, o: Record<string, number>) => {
+  let w: Record<string, number> = {};
   while (true) {
+    console.log("o");
+    console.log(o);
+    console.log("w");
+    console.log(w);
     let done = true;
-    terms = simplify(terms);
-    let newTerms: Term[] = [];
-    for (let term of terms) {
-      let resource = input[term.mat];
+    for (const [mat, qty] of Object.entries(o)) {
+      let recipe = input[mat];
+      if (!recipe) continue;
+      let n = Math.ceil(qty / recipe.qty);
+      let remainder = qty % recipe.qty;
 
-      if (resource) {
-        let ratio = Math.floor(term.qty / resource.qty);
-        let remainder = term.qty % resource.qty;
-        if (remainder !== 0) {
-          newTerms.push({ qty: remainder, mat: term.mat });
-        }
-
-        if (ratio >= 1) {
-          for (let ingredient of resource.ingredients) {
-            newTerms.push({ qty: ingredient.qty * ratio, mat: ingredient.mat });
-          }
-          done = false;
-        }
-      } else {
-        newTerms.push(term);
+      if (remainder > 0) {
+        let left = recipe.qty - remainder;
+        w[mat] = w[mat] || 0;
+        w[mat] += left;
       }
+
+      for (const ingredient of recipe.ingredients) {
+        o[ingredient.mat] = o[ingredient.mat] || 0;
+        o[ingredient.mat] += ingredient.qty * n;
+      }
+      delete o[mat];
+      done = false;
     }
-    terms = newTerms;
     if (done) break;
   }
-  terms.sort((a, b) => {
-    if (a.mat < b.mat) return -1;
-    if (a.mat > b.mat) return 1;
-    return 0;
-  });
-  return terms;
-}
-
-interface Ctx {
-  min: number;
-  seen: Set<string>;
-}
-
-function solve(
-  input: Record<string, Recipe>,
-  terms: Term[],
-  ctx: Ctx,
-  path: number[]
-): number {
-  terms = expand(input, terms);
-  if (path.length < 6) {
-    console.log("**", path);
-    console.log(terms);
-  }
-  let hash = JSON.stringify(terms);
-  if (ctx.seen.has(hash)) {
-    return Infinity;
-  }
-  ctx.seen.add(hash);
-  let candidates = [];
-  for (let [idx, term] of terms.entries()) {
-    let resource = input[term.mat];
-    if (!resource) {
-      continue;
-    }
-    // new Terms without current one
-    let newTerms = terms.slice(0, idx).concat(terms.slice(idx + 1));
-
-    let ratio = Math.ceil(term.qty / resource.qty);
-    for (let ingredient of resource.ingredients) {
-      newTerms.push({ qty: ingredient.qty * ratio, mat: ingredient.mat });
-    }
-
-    newTerms = simplify(newTerms);
-
-    let score = Infinity;
-    for (term of newTerms) {
-      if (!input[term.qty]) {
-        score = term.qty;
-        break;
-      }
-    }
-    let candidate = { terms: newTerms, score: score };
-
-    candidates.push(candidate);
-  }
-  if (candidates.length === 0) {
-    // Nothing left to expand
-    if (terms.length !== 1) throw new Error("Expected single entry");
-
-    return terms[0].qty;
-  }
-
-  candidates.sort((a, b) => {
-    if (a.score < b.score) return -1;
-    if (a.score > b.score) return 1;
-    return 0;
-  });
-
-  let min = Infinity;
-
-  for (let [idx, candidate] of candidates.entries()) {
-    let v = solve(input, candidate.terms, ctx, [...path, idx]);
-
-    if (v < min) {
-      min = v;
-      if (v < ctx.min) {
-        console.log("New minimum", v);
-        ctx.min = v;
-      }
-    }
-  }
-  return min;
-}
+};
 
 function solution() {
   let input = readInput();
-  console.log(
-    solve(
-      input,
-      [{ qty: 1, mat: "FUEL" }],
-      { min: Infinity, seen: new Set() },
-      []
-    )
-  );
+  console.log(solve(input, { FUEL: 1 }));
 }
 
 export default solution;
