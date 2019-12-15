@@ -28,7 +28,7 @@ interface Term {
 }
 
 const readInput = (): Record<string, Recipe> => {
-  const lines = example.split(/\n/);
+  const lines = example2.split(/\n/);
   if (!lines) throw new Error("Not found");
   return R.fromPairs(
     R.map((line: string) => {
@@ -71,6 +71,7 @@ const solve = (input: Record<string, Recipe>, o: Record<string, number>) => {
       }
       delete o[mat];
       done = false;
+      break;
     }
     if (done) break;
   }
