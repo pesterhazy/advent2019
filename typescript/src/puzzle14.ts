@@ -28,7 +28,7 @@ interface Term {
 }
 
 const readInput = (): Record<string, Recipe> => {
-  const lines = example3.split(/\n/);
+  const lines = example2.split(/\n/);
   if (!lines) throw new Error("Not found");
   return R.fromPairs(
     R.map((line: string) => {
@@ -48,8 +48,6 @@ const readInput = (): Record<string, Recipe> => {
 const solve = (input: Record<string, Recipe>, o: Record<string, number>) => {
   let w: Record<string, number> = {};
   while (true) {
-    console.log("o");
-    console.log(o);
     let done = true;
     for (const [mat, qty] of Object.entries(o)) {
       let recipe = input[mat];
@@ -78,11 +76,36 @@ const solve = (input: Record<string, Recipe>, o: Record<string, number>) => {
     }
     if (done) break;
   }
+  return o.ORE;
 };
+
+const TARGET = 1000000000000;
 
 function solution() {
   let input = readInput();
-  console.log(solve(input, { FUEL: 1 }));
+  let upper;
+  let lower = 1;
+  for (upper = 1; ; upper *= 2) {
+    let ore = solve(input, { FUEL: upper });
+    if (ore >= TARGET) break;
+    lower = upper;
+  }
+  let n = 0;
+  while (true) {
+    console.log(lower, upper);
+    let fuel = Math.floor((upper + lower) / 2);
+    let ore = solve(input, { FUEL: fuel });
+
+    console.log("fuel", fuel);
+    console.log("ore", ore);
+    if (upper === lower) break;
+
+    if (ore < TARGET) lower = fuel;
+    else if (ore > TARGET) upper = fuel;
+    else break;
+
+    if (n++ > 100) throw new Error("boom");
+  }
 }
 
 export default solution;
