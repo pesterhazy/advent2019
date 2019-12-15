@@ -138,7 +138,7 @@ function* gen(initialState: State) {
 
 const dx = [0, 0, -1, 1];
 const dy = [-1, 1, 0, 0];
-const invert = [-1, 2, 1, 4, 3];
+const invert = [2, 1, 4, 3];
 
 function run(initialState: State) {
   let g = gen(initialState);
@@ -200,7 +200,7 @@ function run(initialState: State) {
     if (done) {
       if (history.length === 0) break;
       let originalDir = history.pop() as number;
-      let dir = invert[originalDir];
+      let dir = invert[originalDir - 1];
       let ret = call(dir);
       if (ret !== 1) throw new Error("Unexpected ret while backtracking");
       let dest = { x: pos.x + dx[dir - 1], y: pos.y + dy[dir - 1] };
