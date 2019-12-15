@@ -28,7 +28,7 @@ interface Term {
 }
 
 const readInput = (): Record<string, Recipe> => {
-  const lines = example2.split(/\n/);
+  const lines = example3.split(/\n/);
   if (!lines) throw new Error("Not found");
   return R.fromPairs(
     R.map((line: string) => {
@@ -50,8 +50,6 @@ const solve = (input: Record<string, Recipe>, o: Record<string, number>) => {
   while (true) {
     console.log("o");
     console.log(o);
-    console.log("w");
-    console.log(w);
     let done = true;
     for (const [mat, qty] of Object.entries(o)) {
       let recipe = input[mat];
@@ -66,8 +64,13 @@ const solve = (input: Record<string, Recipe>, o: Record<string, number>) => {
       }
 
       for (const ingredient of recipe.ingredients) {
+        w[ingredient.mat] = w[ingredient.mat] || 0;
+        let v = ingredient.qty * n;
+        let s = Math.min(w[ingredient.mat], v);
+        w[ingredient.mat] -= s;
+        v -= s;
         o[ingredient.mat] = o[ingredient.mat] || 0;
-        o[ingredient.mat] += ingredient.qty * n;
+        o[ingredient.mat] += v;
       }
       delete o[mat];
       done = false;
