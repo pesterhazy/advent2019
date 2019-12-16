@@ -8,11 +8,9 @@ const exampleOurs =
 
 const readInput = (): number[] =>
   R.map(s => parseInt(s), Array.from(exampleOurs));
-const basePattern = [0, 1, 0, -1];
 
 const transform = (vs: number[]): number[] => {
   let newVs = [];
-  let patLen = basePattern.length;
   let len = vs.length;
   for (let i = 0; i < len; i++) {
     let idx = 0,
@@ -22,14 +20,14 @@ const transform = (vs: number[]): number[] => {
       if (n === i + 1) {
         n = 0;
         idx++;
-        if (idx === patLen) idx = 0;
+        if (idx === 4) idx = 0;
       }
     };
     next(); // skip first
     let sum = 0;
     for (let j = 0; j < len; j++) {
-      let mult = basePattern[idx];
-      sum += vs[j] * mult;
+      if (idx === 1) sum += vs[j];
+      else if (idx === 3) sum -= vs[j];
       next();
     }
     newVs.push(Math.abs(sum) % 10);
@@ -37,7 +35,7 @@ const transform = (vs: number[]): number[] => {
   return newVs;
 };
 
-function part1(input: number[], nPhases: number, repeat: number) {
+function calc(input: number[], nPhases: number, repeat: number) {
   let vs = [];
   for (let i = 0; i < repeat; i++) {
     for (let ch of input) {
@@ -59,10 +57,12 @@ function solution() {
   let input = readInput();
   let nPhases = 100;
 
-  let result = part1(input, nPhases, 1);
-  if (result !== "30379585") throw new Error("Unexpected result");
+  for (let i = 0; i < 10; i++) {
+    let result = calc(input, nPhases, 1);
+    if (result !== "30379585") throw new Error("Unexpected result");
+  }
 
-  part1(input, nPhases, 3);
+  calc(input, nPhases, 3);
 
   return;
 
