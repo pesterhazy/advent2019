@@ -1,4 +1,5 @@
 import * as R from "ramda";
+import { performance } from "perf_hooks";
 
 const example = "12345678";
 const example2 = "80871224585914546619083218645595";
@@ -20,7 +21,6 @@ const transform = (vs: number[]): number[] => {
     }
     newVs.push(Math.abs(sum) % 10);
   }
-  console.log("*");
   return newVs;
 };
 
@@ -31,11 +31,16 @@ function solution() {
   {
     let vs = input;
 
+    var t0 = performance.now();
     for (let phase = 0; phase < nPhases; phase++) {
       vs = transform(vs);
     }
+    var t1 = performance.now();
     console.log(vs.slice(0, 8).join(""));
+    console.log("timing", t1 - t0);
   }
+
+  return;
 
   {
     let offset = parseInt(input.slice(0, 7).join(""));
