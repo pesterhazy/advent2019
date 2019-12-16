@@ -225,6 +225,46 @@ function run(initialState: State) {
     }
     console.log(line);
   }
+
+  pos = target;
+  history = [];
+  let dist: Map<string, number> = new Map();
+  let filled: Set<string> = new Set();
+  let longest = 0;
+  while (true) {
+    let done = true;
+    for (let dir of [1, 2, 3, 4]) {
+      let dest = { x: pos.x + dx[dir - 1], y: pos.y + dy[dir - 1] };
+
+      if (wall.has(`${dest.x},${dest.y}`)) {
+        continue;
+      }
+      if (filled.has(`${dest.x},${dest.y}`)) {
+        continue;
+      }
+
+      pos = dest;
+      filled.add(`${pos.x},${pos.y}`);
+      history.push(dir);
+
+      let v = Math.min(
+        dist.get(`${pos.x},${pos.y}`) || Infinity,
+        history.length
+      );
+      if (v > longest) longest = v;
+      dist.set(`${pos.x},${pos.y}`, v);
+      done = false;
+      break;
+    }
+    if (done) {
+      if (history.length === 0) break;
+      let originalDir = history.pop() as number;
+      let dir = invert[originalDir - 1];
+      let dest = { x: pos.x + dx[dir - 1], y: pos.y + dy[dir - 1] };
+      pos = dest;
+    }
+  }
+  console.log(longest);
 }
 
 function solution() {
