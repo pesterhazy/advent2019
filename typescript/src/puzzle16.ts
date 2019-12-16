@@ -10,8 +10,8 @@ const readInput = (): number[] =>
   R.map(s => parseInt(s), Array.from(exampleOurs));
 
 const transform = (vs: number[]): number[] => {
-  let newVs = [];
   let len = vs.length;
+  let newVs = new Array(len);
   for (let i = 0; i < len; i++) {
     let idx = 0,
       n = 0;
@@ -30,7 +30,7 @@ const transform = (vs: number[]): number[] => {
       else if (idx === 3) sum -= vs[j];
       next();
     }
-    newVs.push(Math.abs(sum) % 10);
+    newVs[i] = Math.abs(sum) % 10;
   }
   return newVs;
 };
