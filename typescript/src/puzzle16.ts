@@ -9,30 +9,34 @@ const exampleOurs =
 const readInput = (): number[] =>
   R.map(s => parseInt(s), Array.from(exampleOurs));
 
-const transform = (vs: number[]): number[] => {
-  let len = vs.length;
-  let newVs = new Array(len);
-  for (let i = 0; i < len; i++) {
-    let idx = 0,
-      n = 0;
-    const next = () => {
-      n++;
-      if (n > i) {
+const transform = (input: number[], nPhases: number): number[] => {
+  let len = input.length;
+  let from = input.slice();
+  let to = new Array(len);
+  for (let phase = 0; phase < nPhases; phase++) {
+    for (let i = 0; i < len; i++) {
+      let idx = 0,
         n = 0;
-        idx++;
-        if (idx === 4) idx = 0;
+      const next = () => {
+        n++;
+        if (n > i) {
+          n = 0;
+          idx++;
+          if (idx === 4) idx = 0;
+        }
+      };
+      next(); // skip first
+      let sum = 0;
+      for (let j = 0; j < len; j++) {
+        if (idx === 1) sum += from[j];
+        else if (idx === 3) sum -= from[j];
+        next();
       }
-    };
-    next(); // skip first
-    let sum = 0;
-    for (let j = 0; j < len; j++) {
-      if (idx === 1) sum += vs[j];
-      else if (idx === 3) sum -= vs[j];
-      next();
+      to[i] = Math.abs(sum) % 10;
     }
-    newVs[i] = Math.abs(sum) % 10;
+    [from, to] = [to, from];
   }
-  return newVs;
+  return from;
 };
 
 function calc(input: number[], nPhases: number, repeat: number) {
@@ -44,9 +48,7 @@ function calc(input: number[], nPhases: number, repeat: number) {
   }
 
   var t0 = performance.now();
-  for (let phase = 0; phase < nPhases; phase++) {
-    vs = transform(vs);
-  }
+  vs = transform(vs, nPhases);
   var t1 = performance.now();
   let result = vs.slice(0, 8).join("");
   console.log("timing", t1 - t0);
@@ -64,24 +66,24 @@ function solution() {
 
   calc(input, nPhases, 3);
 
-  return;
+  // return;
 
-  {
-    let offset = parseInt(input.slice(0, 7).join(""));
+  // {
+  //   let offset = parseInt(input.slice(0, 7).join(""));
 
-    let vs = [];
-    for (let i = 0; i < 1000; i++) {
-      for (let ch of input) {
-        vs.push(ch);
-      }
-    }
+  //   let vs = [];
+  //   for (let i = 0; i < 1000; i++) {
+  //     for (let ch of input) {
+  //       vs.push(ch);
+  //     }
+  //   }
 
-    for (let phase = 0; phase < nPhases; phase++) {
-      vs = transform(vs);
-      console.log(phase);
-    }
-    console.log(vs.slice(offset, offset + 8).join(""));
-  }
+  //   for (let phase = 0; phase < nPhases; phase++) {
+  //     vs = transform(vs);
+  //     console.log(phase);
+  //   }
+  //   console.log(vs.slice(offset, offset + 8).join(""));
+  // }
 }
 
 export default solution;
