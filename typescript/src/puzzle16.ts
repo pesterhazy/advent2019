@@ -11,14 +11,16 @@ const basePattern = [0, 1, 0, -1];
 
 const transform = (vs: number[]): number[] => {
   let newVs = [];
-  for (let i = 0; i < vs.length; i++) {
+  let len = vs.length;
+  for (let i = 0; i < len; i++) {
     let sum = 0;
-    for (let j = 0; j < vs.length; j++) {
+    for (let j = 0; j < len; j++) {
       sum +=
         vs[j] * basePattern[Math.floor((j + 1) / (i + 1)) % basePattern.length];
     }
     newVs.push(Math.abs(sum) % 10);
   }
+  console.log("*");
   return newVs;
 };
 
