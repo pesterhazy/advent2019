@@ -17,7 +17,7 @@ const transform = (vs: number[]): number[] => {
       n = 0;
     const next = () => {
       n++;
-      if (n === i + 1) {
+      if (n > i) {
         n = 0;
         idx++;
         if (idx === 4) idx = 0;
