@@ -24,15 +24,33 @@ const transform = (vs: number[]): number[] => {
 
 function solution() {
   let input = readInput();
-
-  let vs = input;
   let nPhases = 100;
 
-  for (let phase = 0; phase < nPhases; phase++) {
-    vs = transform(vs);
+  {
+    let vs = input;
+
+    for (let phase = 0; phase < nPhases; phase++) {
+      vs = transform(vs);
+    }
+    console.log(vs.slice(0, 8).join(""));
   }
 
-  console.log(vs.slice(0, 8).join(""));
+  {
+    let offset = parseInt(input.slice(0, 7).join(""));
+
+    let vs = [];
+    for (let i = 0; i < 1000; i++) {
+      for (let ch of input) {
+        vs.push(ch);
+      }
+    }
+
+    for (let phase = 0; phase < nPhases; phase++) {
+      vs = transform(vs);
+      console.log(phase);
+    }
+    console.log(vs.slice(offset, offset + 8).join(""));
+  }
 }
 
 export default solution;
