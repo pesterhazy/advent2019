@@ -12,33 +12,49 @@ const basePattern = [0, 1, 0, -1];
 
 const transform = (vs: number[]): number[] => {
   let newVs = [];
+  let patLen = basePattern.length;
   let len = vs.length;
   for (let i = 0; i < len; i++) {
+    let idx = 0,
+      n = 0;
+    const next = () => {
+      n++;
+      if (n === i + 1) {
+        n = 0;
+        idx++;
+        if (idx === patLen) idx = 0;
+      }
+    };
+    next(); // skip first
     let sum = 0;
     for (let j = 0; j < len; j++) {
-      sum +=
-        vs[j] * basePattern[Math.floor((j + 1) / (i + 1)) % basePattern.length];
+      let mult = basePattern[idx];
+      sum += vs[j] * mult;
+      next();
     }
     newVs.push(Math.abs(sum) % 10);
   }
   return newVs;
 };
 
+function part1(input: number[], nPhases: number) {
+  let vs = input;
+
+  var t0 = performance.now();
+  for (let phase = 0; phase < nPhases; phase++) {
+    vs = transform(vs);
+  }
+  var t1 = performance.now();
+  let result = vs.slice(0, 8).join("");
+  if (result !== "30379585") throw new Error("Unexpected result");
+  console.log("timing", t1 - t0);
+}
+
 function solution() {
   let input = readInput();
   let nPhases = 100;
 
-  {
-    let vs = input;
-
-    var t0 = performance.now();
-    for (let phase = 0; phase < nPhases; phase++) {
-      vs = transform(vs);
-    }
-    var t1 = performance.now();
-    console.log(vs.slice(0, 8).join(""));
-    console.log("timing", t1 - t0);
-  }
+  for (let i = 0; i < 50; i++) part1(input, nPhases);
 
   return;
 
