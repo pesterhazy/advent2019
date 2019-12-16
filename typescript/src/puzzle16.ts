@@ -37,8 +37,13 @@ const transform = (vs: number[]): number[] => {
   return newVs;
 };
 
-function part1(input: number[], nPhases: number) {
-  let vs = input;
+function part1(input: number[], nPhases: number, repeat: number) {
+  let vs = [];
+  for (let i = 0; i < repeat; i++) {
+    for (let ch of input) {
+      vs.push(ch);
+    }
+  }
 
   var t0 = performance.now();
   for (let phase = 0; phase < nPhases; phase++) {
@@ -46,15 +51,18 @@ function part1(input: number[], nPhases: number) {
   }
   var t1 = performance.now();
   let result = vs.slice(0, 8).join("");
-  if (result !== "30379585") throw new Error("Unexpected result");
   console.log("timing", t1 - t0);
+  return result;
 }
 
 function solution() {
   let input = readInput();
   let nPhases = 100;
 
-  for (let i = 0; i < 50; i++) part1(input, nPhases);
+  let result = part1(input, nPhases, 1);
+  if (result !== "30379585") throw new Error("Unexpected result");
+
+  part1(input, nPhases, 3);
 
   return;
 
