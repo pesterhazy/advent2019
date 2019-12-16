@@ -15,23 +15,37 @@ const transform = (input: number[], nPhases: number): number[] => {
   let to = new Array(len);
   for (let phase = 0; phase < nPhases; phase++) {
     for (let i = 0; i < len; i++) {
-      let idx = 0,
-        n = 0;
-      const next = () => {
-        n++;
-        if (n > i) {
-          n = 0;
-          idx++;
-          if (idx === 4) idx = 0;
+      let j = 0;
+      let sum = 0;
+
+      const add = (n: number) => {
+        for (let count = 0; count < n; count++) {
+          sum += from[j];
+          j++;
         }
       };
-      next(); // skip first
-      let sum = 0;
-      for (let j = 0; j < len; j++) {
-        if (idx === 1) sum += from[j];
-        else if (idx === 3) sum -= from[j];
-        next();
+      const sub = (n: number) => {
+        for (let count = 0; count < n; count++) {
+          sum -= from[j];
+          j++;
+        }
+      };
+      const skip = (n: number) => {
+        j += n;
+      };
+
+      skip(i); // start by skipping
+      while (true) {
+        add(Math.min(i + 1, Math.max(len - j, 0)));
+        if (j >= len) break;
+        skip(i + 1);
+        if (j >= len) break;
+        sub(Math.min(i + 1, Math.max(len - j, 0)));
+        if (j >= len) break;
+        skip(i + 1);
+        if (j >= len) break;
       }
+
       to[i] = Math.abs(sum) % 10;
     }
     [from, to] = [to, from];
