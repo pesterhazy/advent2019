@@ -153,7 +153,7 @@ function run(initialState: State) {
     .join("");
 
   const peek = ({ x, y }: Point): string => {
-    if (x >= width || y >= height) return ".";
+    if (x < 0 || y < 0 || x >= width || y >= height) return ".";
     else return s[x + y * width];
   };
 
@@ -188,29 +188,39 @@ function run(initialState: State) {
   s = s.replace(/\n/g, "");
 
   let height = s.length / width;
-  console.log(width, "*", height);
 
   let start = findInit();
   let dir = findDir(start);
 
   let p = start;
+  let seen = new Set();
+  let path = [start];
+  let intersections = [];
 
   while (true) {
-    console.log(p);
     let nx = { x: p.x + DELTA[dir].x, y: p.y + DELTA[dir].y };
-    console.log("%j, %j", nx, peek(nx));
     if (peek(nx) == "#") {
+      // move forward
+      path.push(nx);
+      if (seen.has(`${nx.x},${nx.y}`)) {
+        intersections.push(nx);
+      }
+      seen.add(`${nx.x},${nx.y}`);
       p = nx;
     } else {
       let dirs = findDirs(p).filter(d => d !== INVERSE[dir]);
-      if (dirs.length !== 1) {
-        console.log(dirs, dir);
+      if (dirs.length > 1) {
         throw new Error("Unexpected dirs length: " + dirs.length);
+      } else if (dirs.length === 0) {
+        // end of the line
+        break;
       }
-      // change direction
+      // turn
       dir = dirs[0];
     }
   }
+
+  console.log(intersections);
 }
 
 function solution() {
