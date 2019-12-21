@@ -301,9 +301,10 @@ const findBest = (chunks: Chunk[]) => {
     let seq = JSON.parse(key);
 
     let curVal = seqs[key];
-    let curLen = seq.length;
+    // prefer chunnks of length>1
+    let curLen = seq.length + (curVal === 1 ? 0 : 100000);
 
-    if (curVal > maxVal || (curVal === maxVal && curLen > maxLen)) {
+    if (curLen > maxLen || (curLen === maxLen && curLen > maxLen)) {
       maxVal = curVal;
       maxLen = curLen;
       best = seq;
@@ -336,10 +337,21 @@ const replaceSeq = (xs: string[], best: string[], abbrev: string) => {
   return ret;
 };
 
+const encodeRoutine = (xs: string[]): string => {
+  let result = xs
+    .map(r => {
+      let matches = r.match(/([A-Z])([0-9]+)/);
+      if (matches == undefined) throw new Error("Not found");
+      return matches[1] + "," + matches[2];
+    })
+    .join(",");
+  return result;
+};
+
 function compress(
   inputElements: string[]
-): { xs: string[]; abbrevs: Record<string, string[]> } {
-  let abbrevs: Record<string, string[]> = {};
+): { main: string; routines: Record<string, string> } {
+  let routines: Record<string, string> = {};
   let chunks: Chunk[] = [{ tag: "elements", elements: inputElements }];
 
   for (let ak of ["A", "B", "C"]) {
@@ -355,14 +367,19 @@ function compress(
       }
     }
 
-    abbrevs[ak] = best;
+    routines[ak] = encodeRoutine(best);
     chunks = newChunks;
   }
 
-  console.log("CHUNKS: %j", chunks);
-  console.log("ABBREVS: %j", abbrevs);
-
-  return { xs: [], abbrevs: abbrevs };
+  return {
+    main: chunks
+      .map(chunk => {
+        if (chunk.tag !== "abbrev") throw new Error("Not abbrev");
+        return chunk.abbrev;
+      })
+      .join(","),
+    routines
+  };
 }
 
 function solution() {
@@ -370,7 +387,7 @@ function solution() {
   let insts: Inst[] = run(initialState);
 
   let input = insts.map(i => `${i.lr}${i.n}`);
-  console.log(input);
+  console.log(input.join(", "));
   // let input = _.chunk(
   //   "R,8,R,8,R,4,R,4,R,8,L,6,L,2,R,4,R,4,R,8,R,8,R,8,L,6,L,2".split(/,/),
   //   2
@@ -378,7 +395,8 @@ function solution() {
   // let input = [1, 1, 2, 3, 2, 3, 1, 1, 4, 4, 4];
   // let input = [1, 2, 1, 2];
   let xs = input.map(n => n.toString());
-  compress(xs);
+  let result = compress(xs);
+  console.log("%j", result);
 }
 
 export default solution;
