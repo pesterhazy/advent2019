@@ -133,6 +133,7 @@ const getWidth = (s: string) => {
 
 const ROBOT_SIGILS: string[] = ["^", "v", "<", ">"];
 const DIRECTIONS = [0, 1, 2, 3];
+const INVERSE = [1, 0, 3, 2];
 const DELTA: Point[] = [
   { x: 0, y: -1 },
   { x: 0, y: 1 },
@@ -151,7 +152,10 @@ function run(initialState: State) {
     .map(o => String.fromCharCode(o.value as number))
     .join("");
 
-  const peek = ({ x, y }: Point): string => s[x + y * width];
+  const peek = ({ x, y }: Point): string => {
+    if (x >= width || y >= height) return ".";
+    else return s[x + y * width];
+  };
 
   const findInit = (): Point => {
     for (let y = 0; y < height; y++) {
@@ -162,12 +166,20 @@ function run(initialState: State) {
     throw new Error("Not found");
   };
 
-  const findDir = (start: Point): number => {
+  const findDirs = (start: Point): number[] => {
+    let dirs = [];
     for (let dir of DIRECTIONS) {
       let p = { x: start.x + DELTA[dir].x, y: start.y + DELTA[dir].y };
-      if (peek(p) === "#") return dir;
+      if (peek(p) === "#") dirs.push(dir);
     }
-    throw new Error("Not found");
+    return dirs;
+  };
+
+  const findDir = (start: Point): number => {
+    let dirs = findDirs(start);
+    if (dirs.length !== 1)
+      throw new Error("Unepexected dirs length: " + dirs.length);
+    return dirs[0];
   };
 
   console.log(s);
@@ -176,6 +188,7 @@ function run(initialState: State) {
   s = s.replace(/\n/g, "");
 
   let height = s.length / width;
+  console.log(width, "*", height);
 
   let start = findInit();
   let dir = findDir(start);
@@ -185,10 +198,17 @@ function run(initialState: State) {
   while (true) {
     console.log(p);
     let nx = { x: p.x + DELTA[dir].x, y: p.y + DELTA[dir].y };
+    console.log("%j, %j", nx, peek(nx));
     if (peek(nx) == "#") {
       p = nx;
     } else {
-      throw new Error("boom");
+      let dirs = findDirs(p).filter(d => d !== INVERSE[dir]);
+      if (dirs.length !== 1) {
+        console.log(dirs, dir);
+        throw new Error("Unexpected dirs length: " + dirs.length);
+      }
+      // change direction
+      dir = dirs[0];
     }
   }
 }
