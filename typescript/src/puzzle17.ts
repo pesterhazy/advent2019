@@ -290,14 +290,14 @@ const findBest = (xs: string[]) => {
   return best;
 };
 
-const replaceSeq = (xs: string[], best: string[]) => {
+const replaceSeq = (xs: string[], best: string[], abbrev: string) => {
   let ret: Chunk[] = [];
   let i = 0;
   console.log("xs", xs);
   while (i < xs.length) {
     let candidate = xs.slice(i, i + best.length);
     if (_.isEqual(best, candidate)) {
-      ret.push({ tag: "abbrev", abbrev: "X" });
+      ret.push({ tag: "abbrev", abbrev });
       i += best.length;
     } else {
       if (ret.length > 0 && ret[ret.length - 1].tag === "elements") {
@@ -318,12 +318,15 @@ const replaceSeq = (xs: string[], best: string[]) => {
 function compress(
   xs: string[]
 ): { xs: string[]; abbrevs: Record<string, string[]> } {
+  let abbrevs: Record<string, string[]> = {};
   let best = findBest(xs);
-  let newChunks = replaceSeq(xs, best);
+  let newChunks = replaceSeq(xs, best, "A");
+  abbrevs["A"] = best;
 
-  console.log("%j", newChunks);
+  console.log("CHUNKS: %j", newChunks);
+  console.log("ABBREVS: %j", abbrevs);
 
-  return { xs, abbrevs: {} };
+  return { xs, abbrevs: abbrevs };
 }
 
 function solution() {
@@ -331,10 +334,10 @@ function solution() {
 
   // run(initialState);
 
-  // let input = [1, 1, 2, 3, 2, 3, 1, 1, 4, 4, 4];
-  let input = [1, 2, 1, 2];
+  let input = [1, 1, 2, 3, 2, 3, 1, 1, 4, 4, 4];
+  // let input = [1, 2, 1, 2];
   let xs = input.map(n => n.toString());
-  console.log("%j", compress(xs));
+  compress(xs);
 }
 
 export default solution;
