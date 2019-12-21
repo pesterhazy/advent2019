@@ -370,7 +370,11 @@ function solution() {
 
   // run(initialState);
 
-  let input = [1, 1, 2, 3, 2, 3, 1, 1, 4, 4, 4];
+  let input = _.chunk(
+    "R,8,R,8,R,4,R,4,R,8,L,6,L,2,R,4,R,4,R,8,R,8,R,8,L,6,L,2".split(/,/),
+    2
+  ).map(a => a.join(""));
+  // let input = [1, 1, 2, 3, 2, 3, 1, 1, 4, 4, 4];
   // let input = [1, 2, 1, 2];
   let xs = input.map(n => n.toString());
   compress(xs);
