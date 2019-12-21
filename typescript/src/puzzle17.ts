@@ -261,16 +261,23 @@ interface Chunk {
   elements?: string[];
 }
 
-const findBest = (xs: string[]) => {
+const findBest = (chunks: Chunk[]) => {
   let seqs: Record<string, number> = {};
-  for (let i = 0; i < xs.length; i++) {
-    for (let j = i; j < xs.length; j++) {
-      let seq = xs.slice(i, j + 1);
-      if (seq.length < 2) continue;
-      let s = JSON.stringify(seq);
 
-      seqs[s] = seqs[s] || 0;
-      seqs[s]++;
+  for (let chunk of chunks) {
+    if (chunk.tag !== "elements") continue;
+
+    let xs = chunk.elements;
+    if (xs == undefined) throw new Error("Invariant");
+    for (let i = 0; i < xs.length; i++) {
+      for (let j = i; j < xs.length; j++) {
+        let seq = xs.slice(i, j + 1);
+        if (seq.length < 2) continue;
+        let s = JSON.stringify(seq);
+
+        seqs[s] = seqs[s] || 0;
+        seqs[s]++;
+      }
     }
   }
 
@@ -280,7 +287,6 @@ const findBest = (xs: string[]) => {
     let seq = JSON.parse(key);
 
     let score = seqs[key];
-    // console.log(seq, score);
 
     if (score > max) {
       max = score;
@@ -293,7 +299,6 @@ const findBest = (xs: string[]) => {
 const replaceSeq = (xs: string[], best: string[], abbrev: string) => {
   let ret: Chunk[] = [];
   let i = 0;
-  console.log("xs", xs);
   while (i < xs.length) {
     let candidate = xs.slice(i, i + best.length);
     if (_.isEqual(best, candidate)) {
@@ -316,17 +321,32 @@ const replaceSeq = (xs: string[], best: string[], abbrev: string) => {
 };
 
 function compress(
-  xs: string[]
+  inputElements: string[]
 ): { xs: string[]; abbrevs: Record<string, string[]> } {
   let abbrevs: Record<string, string[]> = {};
-  let best = findBest(xs);
-  let newChunks = replaceSeq(xs, best, "A");
-  abbrevs["A"] = best;
+  let chunks: Chunk[] = [{ tag: "elements", elements: inputElements }];
 
-  console.log("CHUNKS: %j", newChunks);
+  for (let ak of ["A", "B", "C"]) {
+    let best = findBest(chunks);
+    if (best == undefined) throw new Error("Did not find best");
+    let newChunks: Chunk[] = [];
+    for (let chunk of chunks) {
+      if (chunk.tag === "abbrev") newChunks.push(chunk);
+      else {
+        let es = chunk.elements;
+        if (es == undefined) throw new Error("invariant");
+        newChunks.push(...replaceSeq(es, best, ak));
+      }
+    }
+
+    abbrevs[ak] = best;
+    chunks = newChunks;
+  }
+
+  console.log("CHUNKS: %j", chunks);
   console.log("ABBREVS: %j", abbrevs);
 
-  return { xs, abbrevs: abbrevs };
+  return { xs: [], abbrevs: abbrevs };
 }
 
 function solution() {
