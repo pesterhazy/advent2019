@@ -173,7 +173,7 @@ interface Inst {
   n: number;
 }
 
-function run(initialState: State) {
+function run(initialState: State): Inst[] {
   let g = gen(initialState);
   let s = Array.from(g)
     .map(o => String.fromCharCode(o.value as number))
@@ -252,7 +252,7 @@ function run(initialState: State) {
   console.log(
     intersections.map((p: Point) => p.x * p.y).reduce((a, b) => a + b)
   );
-  console.log(insts);
+  return insts;
 }
 
 interface Chunk {
@@ -366,14 +366,15 @@ function compress(
 }
 
 function solution() {
-  // let initialState: State = { ip: 0, base: 0, mem: readInput() };
+  let initialState: State = { ip: 0, base: 0, mem: readInput() };
+  let insts: Inst[] = run(initialState);
 
-  // run(initialState);
-
-  let input = _.chunk(
-    "R,8,R,8,R,4,R,4,R,8,L,6,L,2,R,4,R,4,R,8,R,8,R,8,L,6,L,2".split(/,/),
-    2
-  ).map(a => a.join(""));
+  let input = insts.map(i => `${i.lr}${i.n}`);
+  console.log(input);
+  // let input = _.chunk(
+  //   "R,8,R,8,R,4,R,4,R,8,L,6,L,2,R,4,R,4,R,8,R,8,R,8,L,6,L,2".split(/,/),
+  //   2
+  // ).map(a => a.join(""));
   // let input = [1, 1, 2, 3, 2, 3, 1, 1, 4, 4, 4];
   // let input = [1, 2, 1, 2];
   let xs = input.map(n => n.toString());
