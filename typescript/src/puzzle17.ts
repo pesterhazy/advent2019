@@ -220,7 +220,9 @@ function run(initialState: State) {
     }
   }
 
-  console.log(intersections);
+  console.log(
+    intersections.map((p: Point) => p.x * p.y).reduce((a, b) => a + b)
+  );
 }
 
 function solution() {
