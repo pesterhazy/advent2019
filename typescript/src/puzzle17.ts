@@ -133,6 +133,27 @@ const getWidth = (s: string) => {
 
 const ROBOT_SIGILS: string[] = ["^", "v", "<", ">"];
 const DIRECTIONS = [0, 1, 2, 3];
+const turn = (from: number, to: number): string => {
+  switch (`${from},${to}`) {
+    case "0,2":
+      return "L";
+    case "0,3":
+      return "R";
+    case "1,2":
+      return "R";
+    case "1,3":
+      return "L";
+    case "2,0":
+      return "R";
+    case "2,1":
+      return "L";
+    case "3,0":
+      return "L";
+    case "3,1":
+      return "R";
+  }
+  throw new Error("Invalid turn");
+};
 const INVERSE = [1, 0, 3, 2];
 const DELTA: Point[] = [
   { x: 0, y: -1 },
@@ -144,6 +165,11 @@ const DELTA: Point[] = [
 interface Point {
   x: number;
   y: number;
+}
+
+interface Inst {
+  lr: string;
+  n: number;
 }
 
 function run(initialState: State) {
@@ -190,18 +216,19 @@ function run(initialState: State) {
   let height = s.length / width;
 
   let start = findInit();
+  let initialDir = ROBOT_SIGILS.indexOf(peek(start));
   let dir = findDir(start);
 
   let p = start;
   let seen = new Set();
-  let path = [start];
+  let insts: Inst[] = [{ lr: turn(initialDir, dir), n: 0 }];
   let intersections = [];
 
   while (true) {
     let nx = { x: p.x + DELTA[dir].x, y: p.y + DELTA[dir].y };
     if (peek(nx) == "#") {
       // move forward
-      path.push(nx);
+      insts[insts.length - 1].n++;
       if (seen.has(`${nx.x},${nx.y}`)) {
         intersections.push(nx);
       }
@@ -216,6 +243,7 @@ function run(initialState: State) {
         break;
       }
       // turn
+      insts.push({ lr: turn(dir, dirs[0]), n: 0 });
       dir = dirs[0];
     }
   }
@@ -223,6 +251,7 @@ function run(initialState: State) {
   console.log(
     intersections.map((p: Point) => p.x * p.y).reduce((a, b) => a + b)
   );
+  console.log(insts);
 }
 
 function solution() {
