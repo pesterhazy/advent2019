@@ -303,20 +303,12 @@ const findBest = (chunks: Chunk[]) => {
     let curVal = seqs[key];
     let curLen = seq.length;
 
-    console.log(seq, curVal, curLen);
-
-    if (curVal < maxVal) {
-      continue;
+    if (curVal > maxVal || (curVal === maxVal && curLen > maxLen)) {
+      maxVal = curVal;
+      maxLen = curLen;
+      best = seq;
     }
-    if (curVal === maxVal && curLen < maxLen) {
-      continue;
-    }
-
-    maxVal = curVal;
-    maxLen = curLen;
-    best = seq;
   }
-  console.log("BEST", best);
   return best;
 };
 
