@@ -396,7 +396,10 @@ function solution() {
   // let input = [1, 2, 1, 2];
   let xs = input.map(n => n.toString());
   let result = compress(xs);
-  console.log("%j", result);
+  console.log("main", result.main);
+  for (let a in result.routines) {
+    console.log("%j, %j", a, result.routines[a], result.routines[a].length);
+  }
 }
 
 export default solution;
