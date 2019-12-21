@@ -123,14 +123,28 @@ function* gen(initialState: State) {
   }
 }
 
+const getWidth = (s: string) => {
+  for (let i = 0; ; i++) {
+    if (s[i] == "\n") {
+      return i;
+    }
+  }
+};
+
 function run(initialState: State) {
   let g = gen(initialState);
+  let s = Array.from(g)
+    .map(o => String.fromCharCode(o.value as number))
+    .join("");
+  console.log(s);
 
-  console.log(
-    Array.from(g)
-      .map(o => String.fromCharCode(o.value as number))
-      .join("")
-  );
+  let width = getWidth(s);
+  s = s.replace(/\n/g, "");
+
+  let height = s.length / width;
+
+  console.log(width);
+  console.log(height);
 }
 
 function solution() {
