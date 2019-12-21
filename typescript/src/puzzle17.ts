@@ -1,5 +1,6 @@
 import * as R from "ramda";
 import * as util from "./util";
+import * as _ from "lodash";
 
 interface State {
   ip: number;
@@ -254,10 +255,86 @@ function run(initialState: State) {
   console.log(insts);
 }
 
-function solution() {
-  let initialState: State = { ip: 0, base: 0, mem: readInput() };
+interface Chunk {
+  tag: string;
+  abbrev?: string;
+  elements?: string[];
+}
 
-  run(initialState);
+const findBest = (xs: string[]) => {
+  let seqs: Record<string, number> = {};
+  for (let i = 0; i < xs.length; i++) {
+    for (let j = i; j < xs.length; j++) {
+      let seq = xs.slice(i, j + 1);
+      if (seq.length < 2) continue;
+      let s = JSON.stringify(seq);
+
+      seqs[s] = seqs[s] || 0;
+      seqs[s]++;
+    }
+  }
+
+  let best;
+  let max = 0;
+  for (let key in seqs) {
+    let seq = JSON.parse(key);
+
+    let score = seqs[key];
+    // console.log(seq, score);
+
+    if (score > max) {
+      max = score;
+      best = seq;
+    }
+  }
+  return best;
+};
+
+const replaceSeq = (xs: string[], best: string[]) => {
+  let ret: Chunk[] = [];
+  let i = 0;
+  console.log("xs", xs);
+  while (i < xs.length) {
+    let candidate = xs.slice(i, i + best.length);
+    if (_.isEqual(best, candidate)) {
+      ret.push({ tag: "abbrev", abbrev: "X" });
+      i += best.length;
+    } else {
+      if (ret.length > 0 && ret[ret.length - 1].tag === "elements") {
+        let es = ret[ret.length - 1].elements;
+        if (es == undefined) {
+          throw new Error("invariant");
+        }
+        es.push(xs[i]);
+      } else {
+        ret.push({ tag: "elements", elements: [xs[i]] });
+      }
+      i++;
+    }
+  }
+  return ret;
+};
+
+function compress(
+  xs: string[]
+): { xs: string[]; abbrevs: Record<string, string[]> } {
+  let best = findBest(xs);
+  let newChunks = replaceSeq(xs, best);
+
+  console.log("%j", newChunks);
+
+  return { xs, abbrevs: {} };
+}
+
+function solution() {
+  // let initialState: State = { ip: 0, base: 0, mem: readInput() };
+
+  // run(initialState);
+
+  // let input = [1, 1, 2, 3, 2, 3, 1, 1, 4, 4, 4];
+  let input = [1, 2, 1, 2];
+  let xs = input.map(n => n.toString());
+  console.log("%j", compress(xs));
 }
 
 export default solution;
