@@ -269,14 +269,27 @@ const findBest = (chunks: Chunk[]) => {
 
     let xs = chunk.elements;
     if (xs == undefined) throw new Error("Invariant");
+
+    let kys: Set<string> = new Set();
     for (let i = 0; i < xs.length; i++) {
       for (let j = i; j < xs.length; j++) {
         let seq = xs.slice(i, j + 1);
+        // FIXME?!
         if (seq.length < 2) continue;
         let s = JSON.stringify(seq);
 
-        seqs[s] = seqs[s] || 0;
-        seqs[s]++;
+        kys.add(s);
+      }
+    }
+    for (let ky of kys) {
+      let seq = JSON.parse(ky);
+      let i = 0;
+      while (i < xs.length) {
+        if (_.isEqual(seq, xs.slice(i, i + seq.length))) {
+          seqs[ky] = seqs[ky] || 0;
+          seqs[ky]++;
+          i += seq.length;
+        } else i++;
       }
     }
   }
@@ -295,7 +308,7 @@ const findBest = (chunks: Chunk[]) => {
     if (curVal < maxVal) {
       continue;
     }
-    if (curVal === maxVal || curLen < maxLen) {
+    if (curVal === maxVal && curLen < maxLen) {
       continue;
     }
 
