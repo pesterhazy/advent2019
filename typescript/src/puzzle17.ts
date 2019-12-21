@@ -282,17 +282,28 @@ const findBest = (chunks: Chunk[]) => {
   }
 
   let best;
-  let max = 0;
+  let maxVal = 0;
+  let maxLen = 0;
   for (let key in seqs) {
     let seq = JSON.parse(key);
 
-    let score = seqs[key];
+    let curVal = seqs[key];
+    let curLen = seq.length;
 
-    if (score > max) {
-      max = score;
-      best = seq;
+    console.log(seq, curVal, curLen);
+
+    if (curVal < maxVal) {
+      continue;
     }
+    if (curVal === maxVal || curLen < maxLen) {
+      continue;
+    }
+
+    maxVal = curVal;
+    maxLen = curLen;
+    best = seq;
   }
+  console.log("BEST", best);
   return best;
 };
 
