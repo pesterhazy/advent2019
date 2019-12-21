@@ -131,7 +131,14 @@ const getWidth = (s: string) => {
   }
 };
 
-const robotSigils: string[] = ["^", "v", "<", ">"];
+const ROBOT_SIGILS: string[] = ["^", "v", "<", ">"];
+const DIRECTIONS = [0, 1, 2, 3];
+const DELTA: Point[] = [
+  { x: 0, y: -1 },
+  { x: 0, y: 1 },
+  { x: -1, y: 0 },
+  { x: 1, y: 0 }
+];
 
 interface Point {
   x: number;
@@ -149,10 +156,18 @@ function run(initialState: State) {
   const findInit = (): Point => {
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        if (robotSigils.includes(peek({ x, y }))) return { x: x, y: y };
+        if (ROBOT_SIGILS.includes(peek({ x, y }))) return { x: x, y: y };
       }
     }
-    throw new Error("Not foudn");
+    throw new Error("Not found");
+  };
+
+  const findDir = (start: Point): number => {
+    for (let dir of DIRECTIONS) {
+      let p = { x: start.x + DELTA[dir].x, y: start.y + DELTA[dir].y };
+      if (peek(p) === "#") return dir;
+    }
+    throw new Error("Not found");
   };
 
   console.log(s);
@@ -162,7 +177,20 @@ function run(initialState: State) {
 
   let height = s.length / width;
 
-  console.log(peek(findInit()));
+  let start = findInit();
+  let dir = findDir(start);
+
+  let p = start;
+
+  while (true) {
+    console.log(p);
+    let nx = { x: p.x + DELTA[dir].x, y: p.y + DELTA[dir].y };
+    if (peek(nx) == "#") {
+      p = nx;
+    } else {
+      throw new Error("boom");
+    }
+  }
 }
 
 function solution() {
