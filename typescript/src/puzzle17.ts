@@ -131,11 +131,30 @@ const getWidth = (s: string) => {
   }
 };
 
+const robotSigils: string[] = ["^", "v", "<", ">"];
+
+interface Point {
+  x: number;
+  y: number;
+}
+
 function run(initialState: State) {
   let g = gen(initialState);
   let s = Array.from(g)
     .map(o => String.fromCharCode(o.value as number))
     .join("");
+
+  const peek = ({ x, y }: Point): string => s[x + y * width];
+
+  const findInit = (): Point => {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        if (robotSigils.includes(peek({ x, y }))) return { x: x, y: y };
+      }
+    }
+    throw new Error("Not foudn");
+  };
+
   console.log(s);
 
   let width = getWidth(s);
@@ -143,8 +162,7 @@ function run(initialState: State) {
 
   let height = s.length / width;
 
-  console.log(width);
-  console.log(height);
+  console.log(peek(findInit()));
 }
 
 function solution() {
