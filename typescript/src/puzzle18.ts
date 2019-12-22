@@ -23,7 +23,7 @@ const DELTA: Point[] = [
 ];
 
 const readInput = (): Dungeon => {
-  let lines = util.readLines("18-2.txt");
+  let lines = util.readLines("18-4.txt");
   let doors: Record<string, Point> = {};
   let keys: Record<string, Point> = {};
   for (let y = 0; y < lines.length; y++) {
@@ -106,14 +106,31 @@ const solve = (
   d: Dungeon,
   pos: Point,
   travelled: number,
-  collected: Set<string>
+  collected: Set<string>,
+  ctx: { seen: Map<string, number>; best: number }
 ): number => {
+  let hash = JSON.stringify([Array.from(collected), pos.x, pos.y]);
+  let prev = ctx.seen.get(hash);
+
+  if (prev && travelled >= prev) {
+    console.log("CACHE HIT");
+    return Infinity;
+  }
+
+  if (travelled > ctx.best) {
+    return Infinity;
+  }
+
+  ctx.seen.set(hash, travelled);
+
   let locMap = fill(d, pos, collected);
 
   let todo = Object.entries(d.keys).filter(([name, _]) => !collected.has(name));
-  console.log("TODO", todo);
   if (todo.length === 0) {
-    console.log("FOUND", travelled);
+    if (travelled < ctx.best) {
+      ctx.best = travelled;
+      console.log("NEW BEST", travelled);
+    }
     return travelled;
   }
 
@@ -122,20 +139,20 @@ const solve = (
   if (candidates.length === 0) throw new Error("Unreachable keys");
 
   let results = [];
-  if (candidates.length > 1)
-    console.log(
-      "Multiple choice: ",
-      candidates.map(a => a[0])
-    );
+  // if (candidates.length > 1)
+  //   console.log("Multiple choice: ",
+  //     candidates.map(a => a[0])
+  //   );
   for (let [name, p] of candidates) {
     let newCollected = new Set(collected);
     newCollected.add(name);
     let distance = findLoc(locMap, p);
     if (distance == undefined) throw new Error("Impossible");
-    console.log("trying %j, distance %j", name, distance);
-    results.push(solve(d, p, travelled + distance, newCollected));
+    // console.log("trying %j, distance %j", name, distance);
+    results.push(solve(d, p, travelled + distance, newCollected, ctx));
   }
-  return Math.min(...results);
+  let r = Math.min(...results);
+  return r;
 };
 
 function solution() {
@@ -143,9 +160,12 @@ function solution() {
   console.log(d);
   for (let l of d.lines) console.log(l);
 
-  let travelled = solve(d, findInit(d), 0, new Set());
+  let travelled = solve(d, findInit(d), 0, new Set(), {
+    seen: new Map(),
+    best: Infinity
+  });
 
-  console.log("travelled", travelled);
+  console.log("shortest path:", travelled);
 }
 
 export default solution;
