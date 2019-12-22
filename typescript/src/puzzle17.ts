@@ -387,6 +387,40 @@ function compress(
   };
 }
 
+function run2(initialState: State, inputString: string) {
+  let g = gen(initialState);
+
+  let r = g.next();
+  while ((r.value as { type: string }).type === "out") {
+    r = g.next();
+  }
+
+  console.log(r);
+  console.log(inputString);
+
+  // main + newline (as ascii)
+  // wait for input
+  // A + newline (as ascii)
+  // (etc)
+  // n + newline
+
+  for (let i = 0; i < inputString.length; i++) {
+    console.log("-> %j", inputString.charAt(i));
+    r = g.next(inputString.charCodeAt(i));
+    if ((r.value as { type: string }).type !== "in") {
+      let buffer: number[] = [];
+      while ((r.value as { type: string }).type !== "in") {
+        buffer.push((r.value as any).value);
+        r = g.next();
+      }
+      console.log(buffer.map(n => String.fromCharCode(n)).join(""));
+    }
+  }
+  if ((r.value as { type: string }).type !== "out")
+    throw new Error("Pipe failed");
+  console.log(r);
+}
+
 function solution() {
   let initialState: State = { ip: 0, base: 0, mem: readInput() };
   let insts: Inst[] = run(initialState);
@@ -402,9 +436,18 @@ function solution() {
   let xs = input.map(n => n.toString());
   let result = compress(xs);
   console.log("main %j %j", result.main, result.main.length);
+  let inputString = result.main + "\n";
   for (let a in result.routines) {
     console.log("%j, %j", a, result.routines[a], result.routines[a].length);
+    inputString += result.routines[a] + "\n";
   }
+  inputString += "n\n";
+
+  let patchedState = _.cloneDeep(initialState);
+
+  patchedState.mem[0] = 2;
+
+  run2(patchedState, inputString);
 }
 
 export default solution;
