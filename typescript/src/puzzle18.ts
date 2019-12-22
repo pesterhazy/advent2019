@@ -23,7 +23,7 @@ const DELTA: Point[] = [
 ];
 
 const readInput = (): Dungeon => {
-  let lines = util.readLines("18-4.txt");
+  let lines = util.readLines("18.txt");
   let doors: Record<string, Point> = {};
   let keys: Record<string, Point> = {};
   for (let y = 0; y < lines.length; y++) {
@@ -109,11 +109,12 @@ const solve = (
   collected: Set<string>,
   ctx: { seen: Map<string, number>; best: number }
 ): number => {
-  let hash = JSON.stringify([Array.from(collected), pos.x, pos.y]);
+  let tmp = Array.from(collected);
+  tmp.sort();
+  let hash = JSON.stringify([tmp, pos.x, pos.y]);
   let prev = ctx.seen.get(hash);
 
   if (prev && travelled >= prev) {
-    console.log("CACHE HIT");
     return Infinity;
   }
 
