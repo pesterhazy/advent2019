@@ -23,7 +23,7 @@ const DELTA: Point[] = [
 ];
 
 const readInput = (): Dungeon => {
-  let lines = util.readLines("18.txt");
+  let lines = util.readLines("18-1.txt");
   let doors: Record<string, Point> = {};
   let keys: Record<string, Point> = {};
   for (let y = 0; y < lines.length; y++) {
@@ -55,14 +55,14 @@ const findInit = (d: Dungeon): Point => {
 
 type LocMap = Record<number, Record<number, number>>;
 
-const findLoc = (locs: LocMap, p: Point) => {
-  if (!(p.x in locs)) return undefined;
-  return locs[p.x][p.y];
+const findLoc = (locMap: LocMap, p: Point) => {
+  if (!(p.x in locMap)) return undefined;
+  return locMap[p.x][p.y];
 };
 
-const setLoc = (locs: LocMap, p: Point, n: number) => {
-  if (!(p.x in locs)) locs[p.x] = {};
-  locs[p.x][p.y] = n;
+const setLoc = (locMap: LocMap, p: Point, n: number) => {
+  if (!(p.x in locMap)) locMap[p.x] = {};
+  locMap[p.x][p.y] = n;
 };
 
 const fill = (d: Dungeon, init: Point) => {
@@ -81,7 +81,7 @@ const fill = (d: Dungeon, init: Point) => {
       }
 
       let v = peek(d, next);
-      if (v === "#") {
+      if (v === "#" || v.match(/[A-Z]/)) {
         continue;
       }
 
@@ -99,7 +99,7 @@ const fill = (d: Dungeon, init: Point) => {
       pos = path.pop() as Point;
     }
   }
-  console.log(locMap);
+  return locMap;
 };
 
 function solution() {
@@ -110,7 +110,11 @@ function solution() {
   let init = findInit(d);
 
   console.log(init);
-  fill(d, init);
+  let locMap = fill(d, init);
+
+  for (let [name, p] of Object.entries(d.doors)) {
+    console.log(name, findLoc(locMap, p));
+  }
 }
 
 export default solution;
