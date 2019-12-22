@@ -407,18 +407,22 @@ function run2(initialState: State, inputString: string) {
   for (let i = 0; i < inputString.length; i++) {
     console.log("-> %j", inputString.charAt(i));
     r = g.next(inputString.charCodeAt(i));
-    if ((r.value as { type: string }).type !== "in") {
+    console.log(r);
+    if (r.done) break;
+    if (r.value.type !== "in") {
       let buffer: number[] = [];
       while ((r.value as { type: string }).type !== "in") {
-        buffer.push((r.value as any).value);
+        let ch = (r.value as any).value;
+        if (ch > 255) console.log("Unexpectedly high value:", ch);
+        buffer.push(ch);
         r = g.next();
+        if (r.done) break;
       }
       console.log(buffer.map(n => String.fromCharCode(n)).join(""));
     }
+    if (r.done) break;
   }
-  if ((r.value as { type: string }).type !== "out")
-    throw new Error("Pipe failed");
-  console.log(r);
+  if (!r.done) throw new Error("Expected generator to be done");
 }
 
 function solution() {
