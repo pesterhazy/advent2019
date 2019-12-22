@@ -276,6 +276,8 @@ const findBest = (chunks: Chunk[]) => {
         let seq = xs.slice(i, j + 1);
         // FIXME?!
         if (seq.length < 2) continue;
+        // too large for memory
+        if (seq.length > 4) continue;
         let s = JSON.stringify(seq);
 
         kys.add(s);
@@ -304,7 +306,7 @@ const findBest = (chunks: Chunk[]) => {
     // prefer chunnks of length>1
     let curLen = seq.length + (curVal === 1 ? 0 : 100000);
 
-    if (curLen > maxLen || (curLen === maxLen && curLen > maxLen)) {
+    if (curLen > maxLen || (curLen === maxLen && curVal > maxVal)) {
       maxVal = curVal;
       maxLen = curLen;
       best = seq;
@@ -374,7 +376,10 @@ function compress(
   return {
     main: chunks
       .map(chunk => {
-        if (chunk.tag !== "abbrev") throw new Error("Not abbrev");
+        if (chunk.tag !== "abbrev") {
+          console.log(chunks);
+          throw new Error("Not abbrev");
+        }
         return chunk.abbrev;
       })
       .join(","),
@@ -387,7 +392,7 @@ function solution() {
   let insts: Inst[] = run(initialState);
 
   let input = insts.map(i => `${i.lr}${i.n}`);
-  console.log(input.join(", "));
+  console.log(input.join(","));
   // let input = _.chunk(
   //   "R,8,R,8,R,4,R,4,R,8,L,6,L,2,R,4,R,4,R,8,R,8,R,8,L,6,L,2".split(/,/),
   //   2
@@ -396,7 +401,7 @@ function solution() {
   // let input = [1, 2, 1, 2];
   let xs = input.map(n => n.toString());
   let result = compress(xs);
-  console.log("main", result.main);
+  console.log("main %j %j", result.main, result.main.length);
   for (let a in result.routines) {
     console.log("%j, %j", a, result.routines[a], result.routines[a].length);
   }
