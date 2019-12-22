@@ -107,6 +107,7 @@ const solve = (
   pos: Point,
   travelled: number,
   collected: Set<string>,
+  level: number,
   ctx: { seen: Map<string, number>; best: number }
 ): number => {
   let tmp = Array.from(collected);
@@ -139,19 +140,35 @@ const solve = (
 
   if (candidates.length === 0) throw new Error("Unreachable keys");
 
-  let results = [];
+  let jobs: any = [];
   // if (candidates.length > 1)
   //   console.log("Multiple choice: ",
   //     candidates.map(a => a[0])
   //   );
-  for (let [name, p] of candidates) {
+  for (let [idx, [name, p]] of candidates.entries()) {
+    if (level < 5) {
+      console.log("L %j %j/%j", level, idx, candidates.length);
+    }
     let newCollected = new Set(collected);
     newCollected.add(name);
     let distance = findLoc(locMap, p);
     if (distance == undefined) throw new Error("Impossible");
     // console.log("trying %j, distance %j", name, distance);
-    results.push(solve(d, p, travelled + distance, newCollected, ctx));
+    jobs.push([
+      distance,
+      () =>
+        solve(
+          d,
+          p,
+          travelled + (distance as number),
+          newCollected,
+          level + 1,
+          ctx
+        )
+    ]);
   }
+  jobs = _.sortBy(jobs, a => a[0]);
+  let results = jobs.map((a: any) => a[1]());
   let r = Math.min(...results);
   return r;
 };
@@ -161,7 +178,7 @@ function solution() {
   console.log(d);
   for (let l of d.lines) console.log(l);
 
-  let travelled = solve(d, findInit(d), 0, new Set(), {
+  let travelled = solve(d, findInit(d), 0, new Set(), 0, {
     seen: new Map(),
     best: Infinity
   });
