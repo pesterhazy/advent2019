@@ -23,7 +23,7 @@ const DELTA: Point[] = [
 ];
 
 const readInput = (): Dungeon => {
-  let lines = util.readLines("18-1.txt");
+  let lines = util.readLines("18-2.txt");
   let doors: Record<string, Point> = {};
   let keys: Record<string, Point> = {};
   for (let y = 0; y < lines.length; y++) {
@@ -123,7 +123,9 @@ function solution() {
       ([name, p]) => findLoc(locMap, p) != undefined
     );
 
-    if (candidates.length > 1) throw new Error("Not implemented");
+    if (candidates.length > 1) {
+      throw new Error("Not implemented, nCandidates=" + candidates.length);
+    }
     if (candidates.length === 0) throw new Error("Unreachable keys");
 
     let [name, p] = candidates[0];
