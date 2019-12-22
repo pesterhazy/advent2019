@@ -5,6 +5,8 @@ interface Dungeon {
   lines: string[];
   width: number;
   height: number;
+  keys: Record<string, Point>;
+  doors: Record<string, Point>;
 }
 
 interface Point {
@@ -22,7 +24,18 @@ const DELTA: Point[] = [
 
 const readInput = (): Dungeon => {
   let lines = util.readLines("18-1.txt");
-  return { lines, width: lines[0].length, height: lines.length };
+  let doors: Record<string, Point> = {};
+  let keys: Record<string, Point> = {};
+  for (let y = 0; y < lines.length; y++) {
+    for (let x = 0; x < lines[0].length; x++) {
+      if (lines[y][x].match(/[a-z]/)) {
+        keys[lines[y][x]] = { x, y };
+      } else if (lines[y][x].match(/[A-Z]/)) {
+        doors[lines[y][x]] = { x, y };
+      }
+    }
+  }
+  return { lines, width: lines[0].length, height: lines.length, keys, doors };
 };
 
 const peek = (d: Dungeon, { x, y }: Point): string => {
@@ -40,8 +53,13 @@ const findInit = (d: Dungeon): Point => {
   throw new Error("Not found");
 };
 
+const fill = (d: Dungeon, init: Point) => {
+  let pos = init;
+};
+
 function solution() {
   let d = readInput();
+  console.log(d);
   for (let l of d.lines) console.log(l);
 
   let init = findInit(d);
