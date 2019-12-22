@@ -102,38 +102,44 @@ const fill = (d: Dungeon, init: Point, collected: Set<string>) => {
   return locMap;
 };
 
+const solve = (
+  d: Dungeon,
+  pos: Point,
+  travelled: number,
+  collected: Set<string>
+): number => {
+  let locMap = fill(d, pos, collected);
+
+  let todo = Object.entries(d.keys).filter(([name, _]) => !collected.has(name));
+  console.log("TODO", todo);
+  if (todo.length === 0) {
+    console.log("FOUND", travelled);
+    return travelled;
+  }
+
+  let candidates = todo.filter(([_name, p]) => findLoc(locMap, p) != undefined);
+
+  if (candidates.length === 0) throw new Error("Unreachable keys");
+
+  let results = [];
+  for (let [name, p] of candidates) {
+    let newCollected = new Set(collected);
+    newCollected.add(name);
+    let distance = findLoc(locMap, p);
+    if (distance == undefined) throw new Error("Impossible");
+    console.log("trying %j, distance %j", name, distance);
+    results.push(solve(d, pos, travelled + distance, newCollected));
+  }
+  return Math.min(...results);
+};
+
 function solution() {
   let d = readInput();
   console.log(d);
   for (let l of d.lines) console.log(l);
 
-  let pos = findInit(d);
-  let travelled = 0;
-  let collected: Set<string> = new Set();
-  while (true) {
-    console.log(pos);
-    let locMap = fill(d, pos, collected);
+  let travelled = solve(d, findInit(d), 0, new Set());
 
-    let todo = Object.entries(d.keys).filter(
-      ([name, p]) => !collected.has(name)
-    );
-    console.log("TODO", todo);
-    if (todo.length === 0) break;
-    let candidates = todo.filter(
-      ([name, p]) => findLoc(locMap, p) != undefined
-    );
-
-    if (candidates.length > 1) {
-      throw new Error("Not implemented, nCandidates=" + candidates.length);
-    }
-    if (candidates.length === 0) throw new Error("Unreachable keys");
-
-    let [name, p] = candidates[0];
-    console.log("picking %j, distance %j", name, findLoc(locMap, p));
-    travelled += findLoc(locMap, p) as number;
-    collected.add(name);
-    pos = p;
-  }
   console.log("travelled", travelled);
 }
 
