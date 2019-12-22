@@ -65,7 +65,7 @@ const setLoc = (locMap: LocMap, p: Point, n: number) => {
   locMap[p.x][p.y] = n;
 };
 
-const fill = (d: Dungeon, init: Point) => {
+const fill = (d: Dungeon, init: Point, collected: Set<string>) => {
   let pos = init;
   let locMap: LocMap = {};
   let path: Point[] = [];
@@ -81,7 +81,7 @@ const fill = (d: Dungeon, init: Point) => {
       }
 
       let v = peek(d, next);
-      if (v === "#" || v.match(/[A-Z]/)) {
+      if (v === "#" || (v.match(/[A-Z]/) && !collected.has(v.toLowerCase()))) {
         continue;
       }
 
@@ -107,14 +107,32 @@ function solution() {
   console.log(d);
   for (let l of d.lines) console.log(l);
 
-  let init = findInit(d);
+  let pos = findInit(d);
+  let travelled = 0;
+  let collected: Set<string> = new Set();
+  while (true) {
+    console.log(pos);
+    let locMap = fill(d, pos, collected);
 
-  console.log(init);
-  let locMap = fill(d, init);
+    let todo = Object.entries(d.keys).filter(
+      ([name, p]) => !collected.has(name)
+    );
+    console.log("TODO", todo);
+    if (todo.length === 0) break;
+    let candidates = todo.filter(
+      ([name, p]) => findLoc(locMap, p) != undefined
+    );
 
-  for (let [name, p] of Object.entries(d.doors)) {
-    console.log(name, findLoc(locMap, p));
+    if (candidates.length > 1) throw new Error("Not implemented");
+    if (candidates.length === 0) throw new Error("Unreachable keys");
+
+    let [name, p] = candidates[0];
+    console.log("picking %j, distance %j", name, findLoc(locMap, p));
+    travelled += findLoc(locMap, p) as number;
+    collected.add(name);
+    pos = p;
   }
+  console.log("travelled", travelled);
 }
 
 export default solution;
