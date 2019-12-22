@@ -55,6 +55,40 @@ const findInit = (d: Dungeon): Point => {
 
 const fill = (d: Dungeon, init: Point) => {
   let pos = init;
+  let locs: Record<string, number> = {};
+  let path: Point[] = [];
+
+  while (true) {
+    let done = true;
+    for (let dir of DIRECTIONS) {
+      let next = { x: pos.x + DELTA[dir].x, y: pos.y + DELTA[dir].y };
+
+      let loc = locs[JSON.stringify(next)];
+      if (loc != undefined) {
+        // FIXME should check for distance
+        continue;
+      }
+
+      let v = peek(d, next);
+      if (v === "#") {
+        continue;
+      }
+
+      // go there
+      path.push(pos);
+      pos = next;
+      locs[JSON.stringify(pos)] = path.length;
+      done = false;
+    }
+    if (done) {
+      if (path.length === 0) break;
+
+      // backtrack
+
+      pos = path.pop() as Point;
+    }
+  }
+  console.log(locs);
 };
 
 function solution() {
@@ -65,6 +99,7 @@ function solution() {
   let init = findInit(d);
 
   console.log(init);
+  fill(d, init);
 }
 
 export default solution;
