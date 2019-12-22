@@ -122,13 +122,18 @@ const solve = (
   if (candidates.length === 0) throw new Error("Unreachable keys");
 
   let results = [];
+  if (candidates.length > 1)
+    console.log(
+      "Multiple choice: ",
+      candidates.map(a => a[0])
+    );
   for (let [name, p] of candidates) {
     let newCollected = new Set(collected);
     newCollected.add(name);
     let distance = findLoc(locMap, p);
     if (distance == undefined) throw new Error("Impossible");
     console.log("trying %j, distance %j", name, distance);
-    results.push(solve(d, pos, travelled + distance, newCollected));
+    results.push(solve(d, p, travelled + distance, newCollected));
   }
   return Math.min(...results);
 };
