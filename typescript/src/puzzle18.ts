@@ -23,7 +23,7 @@ const DELTA: Point[] = [
 ];
 
 const readInput = (): Dungeon => {
-  let lines = util.readLines("18-1.txt");
+  let lines = util.readLines("18.txt");
   let doors: Record<string, Point> = {};
   let keys: Record<string, Point> = {};
   for (let y = 0; y < lines.length; y++) {
@@ -53,9 +53,21 @@ const findInit = (d: Dungeon): Point => {
   throw new Error("Not found");
 };
 
+type LocMap = Record<number, Record<number, number>>;
+
+const findLoc = (locs: LocMap, p: Point) => {
+  if (!(p.x in locs)) return undefined;
+  return locs[p.x][p.y];
+};
+
+const setLoc = (locs: LocMap, p: Point, n: number) => {
+  if (!(p.x in locs)) locs[p.x] = {};
+  locs[p.x][p.y] = n;
+};
+
 const fill = (d: Dungeon, init: Point) => {
   let pos = init;
-  let locs: Record<string, number> = {};
+  let locMap: LocMap = {};
   let path: Point[] = [];
 
   while (true) {
@@ -63,9 +75,8 @@ const fill = (d: Dungeon, init: Point) => {
     for (let dir of DIRECTIONS) {
       let next = { x: pos.x + DELTA[dir].x, y: pos.y + DELTA[dir].y };
 
-      let loc = locs[JSON.stringify(next)];
-      if (loc != undefined) {
-        // FIXME should check for distance
+      let loc = findLoc(locMap, next);
+      if (loc != undefined && path.length + 1 >= loc) {
         continue;
       }
 
@@ -77,7 +88,7 @@ const fill = (d: Dungeon, init: Point) => {
       // go there
       path.push(pos);
       pos = next;
-      locs[JSON.stringify(pos)] = path.length;
+      setLoc(locMap, pos, path.length);
       done = false;
     }
     if (done) {
@@ -88,7 +99,7 @@ const fill = (d: Dungeon, init: Point) => {
       pos = path.pop() as Point;
     }
   }
-  console.log(locs);
+  console.log(locMap);
 };
 
 function solution() {
