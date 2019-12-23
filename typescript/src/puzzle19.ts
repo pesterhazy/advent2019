@@ -182,10 +182,21 @@ function run(initialState: State) {
 
   let rows = [];
   let prevStartX = 0;
-  for (let y = 5; y < 100; y++) {
+  for (let y = 5; y < 10000; y++) {
     rows[y] = scan(y, prevStartX);
     prevStartX = rows[y].start;
+    if (y < 105) continue;
+
+    let diff = rows[y - 100].end - rows[y].start;
+    console.log(diff);
+    if (diff === 100) {
+      let tx = rows[y].start;
+      let ty = y;
+      console.log(10000 * tx + ty);
+      return;
+    }
   }
+  throw "Nothing found";
 
   console.log(rows);
 }
