@@ -130,9 +130,9 @@ interface Point {
 }
 
 const SKIPY = 700;
-const SIZEY = SKIPY + 700;
+const SIZEY = SKIPY + 1100;
 const SKIPX = 300;
-const SIZEX = 1000;
+const SIZEX = 1500;
 const SQUARE_SIZE = 100;
 
 function run(initialState: State) {
