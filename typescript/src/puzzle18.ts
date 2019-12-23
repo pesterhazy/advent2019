@@ -147,9 +147,6 @@ const solve = (
     );
 
     for (let [idx, [name, p]] of candidates.entries()) {
-      if (level < 5) {
-        console.log("L %j %j/%j", level, idx, candidates.length);
-      }
       let newCollected = new Set(collected);
       newCollected.add(name);
       let distance = findLoc(locMap, p);
@@ -159,21 +156,27 @@ const solve = (
       newPositions[bot] = p;
       jobs.push([
         distance,
-        () =>
-          solve(
+        () => {
+          if (level < 5) {
+            console.log("L %j %j/%j", level, idx + 1, candidates.length);
+          }
+          return solve(
             d,
             newPositions,
             travelled + (distance as number),
             newCollected,
             level + 1,
             ctx
-          )
+          );
+        }
       ]);
     }
   }
   if (jobs.length === 0) throw new Error("No jobs found");
 
-  jobs = _.sortBy(jobs, a => a[0]);
+  if (level !== 0) {
+    jobs = _.sortBy(jobs, a => a[0]);
+  }
   let results = jobs.map((a: any) => a[1]());
   let r = Math.min(...results);
   return r;
@@ -187,7 +190,7 @@ function solution() {
 
   let travelled = solve(d, inits, 0, new Set(), 0, {
     seen: new Map(),
-    best: Infinity
+    best: 2038
   });
 
   console.log("shortest path:", travelled);
