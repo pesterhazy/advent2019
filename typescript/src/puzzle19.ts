@@ -187,7 +187,7 @@ function run(initialState: State) {
     prevStartX = rows[y].start;
     if (y < 105) continue;
 
-    let diff = rows[y - 100].end - rows[y].start;
+    let diff = rows[y - 100 + 1].end - rows[y].start;
     console.log(diff);
     if (diff === 100) {
       let tx = rows[y].start;
