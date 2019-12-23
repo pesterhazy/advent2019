@@ -129,6 +129,9 @@ interface Point {
   y: number;
 }
 
+const SIZE = 40;
+const SQUARE_SIZE = 10;
+
 function run(initialState: State) {
   const peek = ({ x, y }: Point): number => {
     let g = gen(_.cloneDeep(initialState));
@@ -146,15 +149,55 @@ function run(initialState: State) {
     if (typeof r.value.value !== "number") throw "Unexpected type";
     return r.value.value;
   };
+  let m: Record<number, Record<number, number>> = {};
 
   let count = 0;
-  for (let y = 0; y < 50; y++) {
-    for (let x = 0; x < 50; x++) {
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
       let px = peek({ x, y });
+      m[y] = m[y] || {};
+      m[y][x] = px;
       count += px;
     }
   }
   console.log(count);
+
+  // ***
+
+  for (let y = 0; y < SIZE; y++) {
+    let s = "";
+    for (let x = 0; x < SIZE; x++) {
+      if (m[y] && m[y][x] === 1) {
+        s += "#";
+      } else {
+        s += ".";
+      }
+    }
+    console.log(s);
+  }
+
+  let min = Infinity;
+  let best;
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      if (
+        m[y] &&
+        m[y + SQUARE_SIZE - 1] &&
+        m[y][x] === 1 &&
+        m[y + SQUARE_SIZE - 1][x] === 1 &&
+        m[y][x + SQUARE_SIZE - 1] === 1 &&
+        m[y + SQUARE_SIZE - 1][x + SQUARE_SIZE - 1] === 1
+      ) {
+        let dest = Math.sqrt(x * x + y * y);
+        if (dest < min) {
+          dest = min;
+          best = { x, y };
+        }
+      }
+    }
+  }
+
+  console.log(best);
 }
 
 function solution() {
