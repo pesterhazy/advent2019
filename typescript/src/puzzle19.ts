@@ -180,7 +180,14 @@ function run(initialState: State) {
     return { start, end };
   };
 
-  console.log(scan(100, 0));
+  let rows = [];
+  let prevStartX = 0;
+  for (let y = 5; y < 100; y++) {
+    rows[y] = scan(y, prevStartX);
+    prevStartX = rows[y].start;
+  }
+
+  console.log(rows);
 }
 
 function solution() {
