@@ -23,7 +23,7 @@ const DELTA: Point[] = [
 ];
 
 const readInput = (): Dungeon => {
-  let lines = util.readLines("18.txt");
+  let lines = util.readLines("18-p2.txt");
   let doors: Record<string, Point> = {};
   let keys: Record<string, Point> = {};
   for (let y = 0; y < lines.length; y++) {
@@ -44,13 +44,14 @@ const peek = (d: Dungeon, { x, y }: Point): string => {
   else return d.lines[y][x];
 };
 
-const findInit = (d: Dungeon): Point => {
+const findInits = (d: Dungeon): Point[] => {
+  let inits = [];
   for (let y = 0; y < d.height; y++) {
     for (let x = 0; x < d.width; x++) {
-      if (["@"].includes(peek(d, { x, y }))) return { x, y };
+      if (["@"].includes(peek(d, { x, y }))) inits.push({ x, y });
     }
   }
-  throw new Error("Not found");
+  return inits;
 };
 
 type LocMap = Record<number, Record<number, number>>;
@@ -104,7 +105,7 @@ const fill = (d: Dungeon, init: Point, collected: Set<string>) => {
 
 const solve = (
   d: Dungeon,
-  pos: Point,
+  positions: Point[],
   travelled: number,
   collected: Set<string>,
   level: number,
@@ -112,7 +113,7 @@ const solve = (
 ): number => {
   let tmp = Array.from(collected);
   tmp.sort();
-  let hash = JSON.stringify([tmp, pos.x, pos.y]);
+  let hash = JSON.stringify([tmp, ...positions.map(p => [p.x, p.y])]);
   let prev = ctx.seen.get(hash);
 
   if (prev && travelled >= prev) {
@@ -125,47 +126,52 @@ const solve = (
 
   ctx.seen.set(hash, travelled);
 
-  let locMap = fill(d, pos, collected);
-
-  let todo = Object.entries(d.keys).filter(([name, _]) => !collected.has(name));
-  if (todo.length === 0) {
-    if (travelled < ctx.best) {
-      ctx.best = travelled;
-      console.log("NEW BEST", travelled);
-    }
-    return travelled;
-  }
-
-  let candidates = todo.filter(([_name, p]) => findLoc(locMap, p) != undefined);
-
-  if (candidates.length === 0) throw new Error("Unreachable keys");
-
   let jobs: any = [];
-  // if (candidates.length > 1)
-  //   console.log("Multiple choice: ",
-  //     candidates.map(a => a[0])
-  //   );
-  for (let [idx, [name, p]] of candidates.entries()) {
-    if (level < 5) {
-      console.log("L %j %j/%j", level, idx, candidates.length);
+  for (let bot = 0; bot < 4; bot++) {
+    let pos = positions[bot];
+    let locMap = fill(d, pos, collected);
+
+    let todo = Object.entries(d.keys).filter(
+      ([name, _]) => !collected.has(name)
+    );
+    if (todo.length === 0) {
+      if (travelled < ctx.best) {
+        ctx.best = travelled;
+        console.log("NEW BEST", travelled);
+      }
+      return travelled;
     }
-    let newCollected = new Set(collected);
-    newCollected.add(name);
-    let distance = findLoc(locMap, p);
-    if (distance == undefined) throw new Error("Impossible");
-    // console.log("trying %j, distance %j", name, distance);
-    jobs.push([
-      distance,
-      () =>
-        solve(
-          d,
-          p,
-          travelled + (distance as number),
-          newCollected,
-          level + 1,
-          ctx
-        )
-    ]);
+
+    let candidates = todo.filter(
+      ([_name, p]) => findLoc(locMap, p) != undefined
+    );
+
+    if (candidates.length === 0) throw new Error("Unreachable keys");
+
+    for (let [idx, [name, p]] of candidates.entries()) {
+      if (level < 5) {
+        console.log("L %j %j/%j", level, idx, candidates.length);
+      }
+      let newCollected = new Set(collected);
+      newCollected.add(name);
+      let distance = findLoc(locMap, p);
+      if (distance == undefined) throw new Error("Impossible");
+      // console.log("trying %j, distance %j", name, distance);
+      let newPositions = positions.slice();
+      newPositions[bot] = p;
+      jobs.push([
+        distance,
+        () =>
+          solve(
+            d,
+            newPositions,
+            travelled + (distance as number),
+            newCollected,
+            level + 1,
+            ctx
+          )
+      ]);
+    }
   }
   jobs = _.sortBy(jobs, a => a[0]);
   let results = jobs.map((a: any) => a[1]());
@@ -177,8 +183,9 @@ function solution() {
   let d = readInput();
   console.log(d);
   for (let l of d.lines) console.log(l);
+  let inits = findInits(d);
 
-  let travelled = solve(d, findInit(d), 0, new Set(), 0, {
+  let travelled = solve(d, inits, 0, new Set(), 0, {
     seen: new Map(),
     best: Infinity
   });
