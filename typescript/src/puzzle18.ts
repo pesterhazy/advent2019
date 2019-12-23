@@ -146,8 +146,6 @@ const solve = (
       ([_name, p]) => findLoc(locMap, p) != undefined
     );
 
-    if (candidates.length === 0) throw new Error("Unreachable keys");
-
     for (let [idx, [name, p]] of candidates.entries()) {
       if (level < 5) {
         console.log("L %j %j/%j", level, idx, candidates.length);
@@ -173,6 +171,8 @@ const solve = (
       ]);
     }
   }
+  if (jobs.length === 0) throw new Error("No jobs found");
+
   jobs = _.sortBy(jobs, a => a[0]);
   let results = jobs.map((a: any) => a[1]());
   let r = Math.min(...results);
