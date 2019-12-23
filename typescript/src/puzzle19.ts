@@ -129,8 +129,11 @@ interface Point {
   y: number;
 }
 
-const SIZE = 40;
-const SQUARE_SIZE = 10;
+const SKIPY = 700;
+const SIZEY = SKIPY + 700;
+const SKIPX = 300;
+const SIZEX = 1000;
+const SQUARE_SIZE = 100;
 
 function run(initialState: State) {
   const peek = ({ x, y }: Point): number => {
@@ -149,55 +152,76 @@ function run(initialState: State) {
     if (typeof r.value.value !== "number") throw "Unexpected type";
     return r.value.value;
   };
+  const print = () => {
+    for (let y = SKIPY; y < SIZEY; y++) {
+      let s = "";
+      for (let x = SKIPX; x < SIZEX; x++) {
+        if (m[y] && m[y][x] === 1) {
+          s += "#";
+        } else {
+          s += ".";
+        }
+      }
+      console.log(s);
+    }
+  };
   let m: Record<number, Record<number, number>> = {};
 
   let count = 0;
-  for (let y = 0; y < SIZE; y++) {
-    for (let x = 0; x < SIZE; x++) {
+  for (let y = SKIPY; y < SIZEY; y++) {
+    for (let x = SKIPX; x < SIZEX; x++) {
       let px = peek({ x, y });
       m[y] = m[y] || {};
       m[y][x] = px;
       count += px;
     }
   }
-  console.log(count);
+
+  calc(SKIPY);
+  calc(SIZEY - 1);
+
+  function calc(y: number) {
+    {
+      let count = 0;
+      for (let x = SKIPX; x < SIZEX; x++) {
+        if (m[y][x] === 1) count++;
+      }
+      console.log("count", count);
+    }
+  }
+
+  // print();
 
   // ***
 
-  for (let y = 0; y < SIZE; y++) {
-    let s = "";
-    for (let x = 0; x < SIZE; x++) {
-      if (m[y] && m[y][x] === 1) {
-        s += "#";
-      } else {
-        s += ".";
-      }
-    }
-    console.log(s);
-  }
+  console.log("Finding...");
+  let best = findSquare();
+  console.log(best, best.x * 10000 + best.y);
 
-  let min = Infinity;
-  let best;
-  for (let y = 0; y < SIZE; y++) {
-    for (let x = 0; x < SIZE; x++) {
-      if (
-        m[y] &&
-        m[y + SQUARE_SIZE - 1] &&
-        m[y][x] === 1 &&
-        m[y + SQUARE_SIZE - 1][x] === 1 &&
-        m[y][x + SQUARE_SIZE - 1] === 1 &&
-        m[y + SQUARE_SIZE - 1][x + SQUARE_SIZE - 1] === 1
-      ) {
-        let dest = Math.sqrt(x * x + y * y);
-        if (dest < min) {
-          dest = min;
-          best = { x, y };
+  function findSquare() {
+    let min = Infinity;
+    let best;
+    for (let y = SKIPY; y < SIZEY; y++) {
+      for (let x = SKIPX; x < SIZEX; x++) {
+        if (
+          m[y] &&
+          m[y + SQUARE_SIZE - 1] &&
+          m[y][x] === 1 &&
+          m[y + SQUARE_SIZE - 1][x] === 1 &&
+          m[y][x + SQUARE_SIZE - 1] === 1 &&
+          m[y + SQUARE_SIZE - 1][x + SQUARE_SIZE - 1] === 1
+        ) {
+          let dest = Math.sqrt(x * x + y * y);
+          if (dest < min) {
+            dest = min;
+            best = { x, y };
+          }
         }
       }
     }
+    if (best == undefined) throw "not found";
+    return best;
   }
-
-  console.log(best);
 }
 
 function solution() {
