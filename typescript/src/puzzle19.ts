@@ -167,6 +167,7 @@ function run(initialState: State) {
         high = mid;
       } else {
         low = mid;
+        // this is annoying - is this the right way to do binary search?
         if (low === high - 1) low = high;
       }
     }
@@ -186,19 +187,17 @@ function run(initialState: State) {
     rows[y] = scan(y, prevStartX);
     prevStartX = rows[y].start;
     if (y < 105) continue;
-
-    let diff = rows[y - 100 + 1].end - rows[y].start;
+    let prevy = y - 100 + 1;
+    let diff = rows[prevy].end - rows[y].start;
     console.log(diff);
     if (diff === 100) {
       let tx = rows[y].start;
-      let ty = y;
+      let ty = prevy;
       console.log(10000 * tx + ty);
       return;
     }
   }
   throw "Nothing found";
-
-  console.log(rows);
 }
 
 function solution() {
