@@ -129,6 +129,8 @@ interface Point {
   y: number;
 }
 
+const SIZE = 3;
+
 function run(initialState: State) {
   const peek = ({ x, y }: Point): number => {
     let g = gen(_.cloneDeep(initialState));
@@ -171,7 +173,7 @@ function run(initialState: State) {
         if (low === high - 1) low = high;
       }
     }
-    return low + 1;
+    return low;
   }
   const scan = (y: number, skipx: number): { start: number; end: number } => {
     if (y < 5) throw "y too low";
@@ -180,20 +182,32 @@ function run(initialState: State) {
     let end = findEnd(start, y);
     return { start, end };
   };
+  function print(endx: number, endy: number) {
+    for (let y = 5; y < endy; y++) {
+      let s = y.toString().padStart(3) + " ";
+      for (let x = 0; x < endx; x++) {
+        s += peek({ x, y }) ? "#" : ".";
+      }
+      console.log(s);
+    }
+  }
+
+  print(80, 80);
 
   let rows = [];
   let prevStartX = 0;
-  for (let y = 5; y < 10000; y++) {
+  for (let y = 5; y < 100; y++) {
     rows[y] = scan(y, prevStartX);
+    // console.log(y, rows[y]);
     prevStartX = rows[y].start;
-    if (y < 105) continue;
-    let prevy = y - 100 + 1;
+    if (y < 5 + SIZE) continue;
+    let prevy = y - SIZE + 1;
     let diff = rows[prevy].end - rows[y].start;
-    console.log(diff);
-    if (diff === 100) {
+    // console.log(diff);
+    if (diff === SIZE) {
       let tx = rows[y].start;
       let ty = prevy;
-      console.log(10000 * tx + ty);
+      console.log(tx, ty, 10000 * tx + ty);
       return;
     }
   }
