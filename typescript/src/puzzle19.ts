@@ -129,7 +129,7 @@ interface Point {
   y: number;
 }
 
-const SIZE = 3;
+const SIZE = 100;
 
 function run(initialState: State) {
   const peek = ({ x, y }: Point): number => {
@@ -196,7 +196,7 @@ function run(initialState: State) {
 
   let rows = [];
   let prevStartX = 0;
-  for (let y = 5; y < 100; y++) {
+  for (let y = 5; ; y++) {
     rows[y] = scan(y, prevStartX);
     // console.log(y, rows[y]);
     prevStartX = rows[y].start;
@@ -208,6 +208,7 @@ function run(initialState: State) {
       let tx = rows[y].start;
       let ty = prevy;
       console.log(tx, ty, 10000 * tx + ty);
+      console.log(rows[prevy].start, rows[prevy].end);
       return;
     }
   }
