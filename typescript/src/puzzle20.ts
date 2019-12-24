@@ -197,8 +197,22 @@ type DistMap = Record<number, Record<number, number>>;
 // -2: start
 // -1: end
 
-const shortest = (distances: DistMap, src: number, dest: number): number => {
-  return -1;
+const shortest = (
+  distances: DistMap,
+  src: number,
+  dest: number,
+  seen: number[]
+): number => {
+  let options = distances[src];
+
+  const dists = Object.entries(options).map(([hopStr, dist]) => {
+    let hop = parseInt(hopStr);
+    if (hop === -1) return dist;
+    if (seen.includes(hop)) return Infinity;
+    return dist + shortest(distances, hop, dest, [...seen, hop]);
+  });
+  console.log(dists);
+  return Math.min(...dists);
 };
 
 function solve(d: Dungeon) {
@@ -211,7 +225,7 @@ function solve(d: Dungeon) {
     distances[idx] = findDistances(d, p);
   }
 
-  let dist = shortest(distances, -2, -1);
+  let dist = shortest(distances, -2, -1, []);
 
   console.log("dist", dist);
 }
