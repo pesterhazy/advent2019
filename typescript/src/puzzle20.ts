@@ -207,7 +207,10 @@ const shortest = (
 
   const dists = Object.entries(options).map(([hopStr, dist]) => {
     let hop = parseInt(hopStr);
-    if (hop === -1) return dist;
+    if (hop === -1) {
+      console.log("leaf", dist, [...seen, hop]);
+      return dist;
+    }
     if (seen.includes(hop)) return Infinity;
     return dist + shortest(distances, hop, dest, [...seen, hop]);
   });
