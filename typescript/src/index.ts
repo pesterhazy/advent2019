@@ -1,3 +1,3 @@
-import run from "./puzzle19";
+import run from "./puzzle20";
 
 run();
