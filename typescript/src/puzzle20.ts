@@ -60,7 +60,7 @@ const label = (
 };
 
 const readInput = (): Dungeon => {
-  let lines = util.readLines("20-1.txt");
+  let lines = util.readLines("20.txt");
   let labels: Record<string, Point[]> = {};
   let portals: Portal[] = [];
   let teleports: Record<number, Record<number, Point>> = {};
