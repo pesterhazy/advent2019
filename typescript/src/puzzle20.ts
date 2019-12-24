@@ -146,21 +146,29 @@ const findDistances = (d: Dungeon, src: Point): Record<number, number> => {
 
   while (true) {
     let done = true;
-    for (let dir of DIRECTIONS) {
-      let next = { x: pos.x + DELTA[dir].x, y: pos.y + DELTA[dir].y };
-
+    let options: Point[] = [
+      ...DIRECTIONS.map(dir => ({
+        x: pos.x + DELTA[dir].x,
+        y: pos.y + DELTA[dir].y
+      }))
+    ];
+    if (
+      d.teleports[pos.x] != undefined &&
+      d.teleports[pos.x][pos.y] != undefined
+    ) {
+      options.push(d.teleports[pos.x][pos.y]);
+    }
+    for (let next of options) {
       let loc = findLoc(locMap, next);
       if (loc != undefined && path.length + 1 >= loc) {
         continue;
       }
 
       let v = peek(d, next);
-      // FIXME: teleport
       if (v !== ".") {
         continue;
       }
 
-      // go there
       path.push(pos);
       pos = next;
       setLoc(locMap, pos, path.length);
@@ -209,7 +217,7 @@ const shortest = (
   const results = Object.entries(options).map(([hopStr, dist]) => {
     let hop = parseInt(hopStr);
     if (hop === -1) {
-      console.log("->", [...seen, hop], [...dists, dist]);
+      // console.log("->", [...seen, hop], [...dists, dist]);
       return dist;
     }
     if (seen.includes(hop)) return Infinity;
@@ -217,7 +225,7 @@ const shortest = (
       dist + shortest(distances, hop, dest, [...seen, hop], [...dists, dist])
     );
   });
-  console.log(results);
+  // console.log(results);
   return Math.min(...results);
 };
 
