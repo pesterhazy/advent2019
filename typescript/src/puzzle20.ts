@@ -1,13 +1,16 @@
 import * as util from "./util";
 import * as _ from "lodash";
 
+type Portal = [Point, Point];
+
 interface Dungeon {
   lines: string[];
   width: number;
   height: number;
   start: Point;
   end: Point;
-  portals: Record<number, Record<number, Point>>;
+  portals: Portal[];
+  teleports: Record<number, Record<number, Point>>;
 }
 
 interface Point {
@@ -59,15 +62,17 @@ const label = (
 const readInput = (): Dungeon => {
   let lines = util.readLines("20-1.txt");
   let labels: Record<string, Point[]> = {};
-  let portals: Record<number, Record<number, Point>> = {};
+  let portals: Portal[] = [];
+  let teleports: Record<number, Record<number, Point>> = {};
 
-  let d = {
+  let d: Dungeon = {
     lines,
     width: lines[0].length,
     height: lines.length,
     start: { x: -1, y: -1 },
     end: { x: -1, y: -1 },
-    portals: {}
+    teleports: {},
+    portals: []
   };
 
   for (let y = 0; y < lines.length; y++) {
@@ -83,7 +88,6 @@ const readInput = (): Dungeon => {
         if (r2.ch !== ".") throw "Expected . got " + r2.ch;
 
         let l = label(r, { ch: ch, p: { x, y } });
-        console.log(l, r2);
         labels[l] = labels[l] || [];
         labels[l].push(r2.p);
       }
@@ -101,13 +105,17 @@ const readInput = (): Dungeon => {
       continue;
     }
     if (ar.length !== 2) throw "oops length: " + ar.length;
-    let [a, b] = ar;
+    let [a, b]: [Point, Point] = ar as [Point, Point];
 
-    portals[a.x] = portals[a.x] || {};
-    portals[a.x][a.y] = b;
-    portals[b.x] = portals[b.x] || {};
-    portals[b.x][b.y] = a;
+    portals.push([a, b]);
+    portals.push([b, a]);
+
+    teleports[a.x] = teleports[a.x] || {};
+    teleports[a.x][a.y] = b;
+    teleports[b.x] = teleports[b.x] || {};
+    teleports[b.x][b.y] = a;
   }
+  d.teleports = teleports;
   d.portals = portals;
 
   return d;
@@ -117,16 +125,6 @@ const peek = (d: Dungeon, { x, y }: Point): string => {
   if (x < 0 || y < 0 || x >= d.width || y >= d.height)
     throw new Error("Out of bounds");
   else return d.lines[y][x];
-};
-
-const findInits = (d: Dungeon): Point[] => {
-  let inits = [];
-  for (let y = 0; y < d.height; y++) {
-    for (let x = 0; x < d.width; x++) {
-      if (["@"].includes(peek(d, { x, y }))) inits.push({ x, y });
-    }
-  }
-  return inits;
 };
 
 type LocMap = Record<number, Record<number, number>>;
@@ -141,9 +139,63 @@ const setLoc = (locMap: LocMap, p: Point, n: number) => {
   locMap[p.x][p.y] = n;
 };
 
+const findDistances = (d: Dungeon, src: Point): [number, number][] => {
+  let pos = src;
+  let locMap: LocMap = {};
+  let path: Point[] = [];
+
+  while (true) {
+    let done = true;
+    for (let dir of DIRECTIONS) {
+      let next = { x: pos.x + DELTA[dir].x, y: pos.y + DELTA[dir].y };
+
+      let loc = findLoc(locMap, next);
+      if (loc != undefined && path.length + 1 >= loc) {
+        continue;
+      }
+
+      let v = peek(d, next);
+      // FIXME: teleport
+      if (v !== ".") {
+        continue;
+      }
+
+      // go there
+      path.push(pos);
+      pos = next;
+      setLoc(locMap, pos, path.length);
+      done = false;
+    }
+    if (done) {
+      if (path.length === 0) break;
+
+      // backtrack
+
+      pos = path.pop() as Point;
+    }
+  }
+  let m: Record<number, number> = {};
+  for (let [idx, [a, b]] of d.portals.entries()) {
+    let dist = findLoc(locMap, a);
+    if (dist != undefined) {
+      m[idx] = dist;
+    }
+  }
+
+  {
+    let dist = findLoc(locMap, d.end);
+    if (dist != undefined) {
+      m[-1] = dist;
+    }
+  }
+  console.log(m);
+  return [];
+};
+
 function solution() {
   let d = readInput();
   console.log(d);
+  findDistances(d, d.start);
 }
 
 export default solution;
