@@ -139,7 +139,7 @@ const setLoc = (locMap: LocMap, p: Point, n: number) => {
   locMap[p.x][p.y] = n;
 };
 
-const findDistances = (d: Dungeon, src: Point): [number, number][] => {
+const findDistances = (d: Dungeon, src: Point): Record<number, number> => {
   let pos = src;
   let locMap: LocMap = {};
   let path: Point[] = [];
@@ -176,6 +176,7 @@ const findDistances = (d: Dungeon, src: Point): [number, number][] => {
   }
   let m: Record<number, number> = {};
   for (let [idx, [a, b]] of d.portals.entries()) {
+    if (a.x === src.x && a.y === src.y) continue;
     let dist = findLoc(locMap, a);
     if (dist != undefined) {
       m[idx] = dist;
@@ -188,14 +189,30 @@ const findDistances = (d: Dungeon, src: Point): [number, number][] => {
       m[-1] = dist;
     }
   }
-  console.log(m);
-  return [];
+  return m;
 };
+
+// -2: start
+// -1: end
+
+function solve(d: Dungeon) {
+  let distances: Record<number, Record<number, number>> = {};
+  for (let idx of [-2, ..._.range(d.portals.length)]) {
+    let p;
+    if (idx === -2) p = d.start;
+    else p = d.portals[idx][0];
+
+    distances[idx] = findDistances(d, p);
+  }
+
+  console.log(distances);
+}
 
 function solution() {
   let d = readInput();
   console.log(d);
-  findDistances(d, d.start);
+  console.log("%j", d.portals);
+  solve(d);
 }
 
 export default solution;
