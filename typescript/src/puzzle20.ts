@@ -201,21 +201,24 @@ const shortest = (
   distances: DistMap,
   src: number,
   dest: number,
-  seen: number[]
+  seen: number[],
+  dists: number[]
 ): number => {
   let options = distances[src];
 
-  const dists = Object.entries(options).map(([hopStr, dist]) => {
+  const results = Object.entries(options).map(([hopStr, dist]) => {
     let hop = parseInt(hopStr);
     if (hop === -1) {
-      console.log("leaf", dist, [...seen, hop]);
+      console.log("->", [...seen, hop], [...dists, dist]);
       return dist;
     }
     if (seen.includes(hop)) return Infinity;
-    return dist + shortest(distances, hop, dest, [...seen, hop]);
+    return (
+      dist + shortest(distances, hop, dest, [...seen, hop], [...dists, dist])
+    );
   });
-  console.log(dists);
-  return Math.min(...dists);
+  console.log(results);
+  return Math.min(...results);
 };
 
 function solve(d: Dungeon) {
@@ -228,7 +231,7 @@ function solve(d: Dungeon) {
     distances[idx] = findDistances(d, p);
   }
 
-  let dist = shortest(distances, -2, -1, []);
+  let dist = shortest(distances, -2, -1, [], []);
 
   console.log("dist", dist);
 }
