@@ -192,11 +192,17 @@ const findDistances = (d: Dungeon, src: Point): Record<number, number> => {
   return m;
 };
 
+type DistMap = Record<number, Record<number, number>>;
+
 // -2: start
 // -1: end
 
+const shortest = (distances: DistMap, src: number, dest: number): number => {
+  return -1;
+};
+
 function solve(d: Dungeon) {
-  let distances: Record<number, Record<number, number>> = {};
+  let distances: DistMap = {};
   for (let idx of [-2, ..._.range(d.portals.length)]) {
     let p;
     if (idx === -2) p = d.start;
@@ -205,7 +211,9 @@ function solve(d: Dungeon) {
     distances[idx] = findDistances(d, p);
   }
 
-  console.log(distances);
+  let dist = shortest(distances, -2, -1);
+
+  console.log("dist", dist);
 }
 
 function solution() {
