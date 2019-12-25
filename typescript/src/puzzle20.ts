@@ -1,16 +1,14 @@
 import * as util from "./util";
 import * as _ from "lodash";
 
-type Portal = [Point, Point];
-
 interface Dungeon {
   lines: string[];
   width: number;
   height: number;
   start: Point;
   end: Point;
-  portals: Portal[];
-  pm: Record<number, number>;
+  positions: Point[];
+  pm: Record<number, number | undefined>;
 }
 
 interface Point {
@@ -60,10 +58,10 @@ const label = (
 };
 
 const readInput = (): Dungeon => {
-  let lines = util.readLines("20.txt");
+  let lines = util.readLines("20-1.txt");
   let labels: Record<string, Point[]> = {};
-  let portals: Portal[] = [];
-  let pm: Record<number, number> = [];
+  let positions: Point[] = [];
+  let pm: Record<number, number | undefined> = [];
 
   let d: Dungeon = {
     lines,
@@ -71,7 +69,7 @@ const readInput = (): Dungeon => {
     height: lines.length,
     start: { x: -1, y: -1 },
     end: { x: -1, y: -1 },
-    portals: [],
+    positions: [],
     pm: {}
   };
 
@@ -89,30 +87,47 @@ const readInput = (): Dungeon => {
 
         let l = label(r, { ch: ch, p: { x, y } });
         labels[l] = labels[l] || [];
-        labels[l].push(r2.p);
+
+        let outer =
+          x < 2 || y < 2 || x >= lines[0].length - 2 || y >= lines.length - 2;
+        if (outer) labels[l][0] = r2.p;
+        else labels[l][1] = r2.p;
       }
     }
   }
 
-  for (let [l, ar] of Object.entries(labels)) {
-    if (l === "AA") {
-      d.start = ar[0];
-      continue;
-    }
+  const MAX_LEVEL = 9;
+  const nlabels = Object.keys(labels).length;
+  for (let level = 0; level < MAX_LEVEL; level++) {
+    let idx = 0;
+    for (let [l, ar] of Object.entries(labels)) {
+      if (l === "AA") {
+        if (level === 0) {
+          d.start = ar[0];
+        }
+        continue;
+      }
 
-    if (l === "ZZ") {
-      d.end = ar[0];
-      continue;
-    }
-    if (ar.length !== 2) throw "oops length: " + ar.length;
-    let [a, b]: [Point, Point] = ar as [Point, Point];
+      if (l === "ZZ") {
+        if (level === 0) {
+          d.end = ar[0];
+        }
+        continue;
+      }
+      if (ar.length !== 2) throw "oops length: " + ar.length;
+      let [a, b]: [Point, Point] = ar as [Point, Point];
 
-    portals.push([a, b]);
-    portals.push([b, a]);
-    pm[portals.length - 1] = portals.length - 2;
-    pm[portals.length - 2] = portals.length - 1;
+      positions[level * nlabels + idx] = a;
+      positions[level * nlabels + idx + 1] = b;
+      pm[level * nlabels + idx] =
+        level === MAX_LEVEL ? undefined : (level + 1) * nlabels + (idx + 1);
+      pm[level * nlabels + (idx + 1)] =
+        level === 0 ? undefined : (level - 1) * nlabels + idx;
+
+      idx += 2;
+    }
   }
-  d.portals = portals;
+  d.positions = positions;
   d.pm = pm;
 
   return d;
@@ -228,17 +243,16 @@ const shortest = (
 };
 
 function solve(d: Dungeon) {
-  let distances: DistMap = {};
-  for (let idx of [-2, ..._.range(d.portals.length)]) {
-    let p;
-    if (idx === -2) p = d.start;
-    else p = d.portals[idx][0];
+  let multiplier = d.portals.length;
+  let distances: DistMap = {}; // from, to -> dist
+  distances[-2] = findDistances(d, d.start);
 
-    distances[idx] = findDistances(d, p);
+  for (let level of _.range(10)) {
+    for (let idx of _.range(d.portals.length)) {
+      let p = d.portals[idx][0];
 
-    if (idx >= 0) {
-      console.log(idx, d.pm[idx]);
-      distances[idx][d.pm[idx]] = 1;
+      distances[level * multiplier + idx] = findDistances(d, p);
+      distances[level * multiplier + idx][d.pm[idx]] = 1;
     }
   }
 
