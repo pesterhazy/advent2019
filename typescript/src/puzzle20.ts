@@ -11,7 +11,6 @@ interface Dungeon {
   end: Point;
   portals: Portal[];
   pm: Record<number, number>;
-  teleports: Record<number, Record<number, Point>>;
 }
 
 interface Point {
@@ -61,10 +60,9 @@ const label = (
 };
 
 const readInput = (): Dungeon => {
-  let lines = util.readLines("20-1.txt");
+  let lines = util.readLines("20.txt");
   let labels: Record<string, Point[]> = {};
   let portals: Portal[] = [];
-  let teleports: Record<number, Record<number, Point>> = {};
   let pm: Record<number, number> = [];
 
   let d: Dungeon = {
@@ -73,7 +71,6 @@ const readInput = (): Dungeon => {
     height: lines.length,
     start: { x: -1, y: -1 },
     end: { x: -1, y: -1 },
-    teleports: {},
     portals: [],
     pm: {}
   };
@@ -114,13 +111,7 @@ const readInput = (): Dungeon => {
     portals.push([b, a]);
     pm[portals.length - 1] = portals.length - 2;
     pm[portals.length - 2] = portals.length - 1;
-
-    teleports[a.x] = teleports[a.x] || {};
-    teleports[a.x][a.y] = b;
-    teleports[b.x] = teleports[b.x] || {};
-    teleports[b.x][b.y] = a;
   }
-  d.teleports = teleports;
   d.portals = portals;
   d.pm = pm;
 
@@ -158,12 +149,6 @@ const findDistances = (d: Dungeon, src: Point): Record<number, number> => {
         y: pos.y + DELTA[dir].y
       }))
     ];
-    if (
-      d.teleports[pos.x] != undefined &&
-      d.teleports[pos.x][pos.y] != undefined
-    ) {
-      options.push(d.teleports[pos.x][pos.y]);
-    }
     for (let next of options) {
       let loc = findLoc(locMap, next);
       if (loc != undefined && path.length + 1 >= loc) {
