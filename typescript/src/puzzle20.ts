@@ -10,6 +10,7 @@ interface Dungeon {
   start: Point;
   end: Point;
   portals: Portal[];
+  pm: Record<number, number>;
   teleports: Record<number, Record<number, Point>>;
 }
 
@@ -60,10 +61,11 @@ const label = (
 };
 
 const readInput = (): Dungeon => {
-  let lines = util.readLines("20.txt");
+  let lines = util.readLines("20-1.txt");
   let labels: Record<string, Point[]> = {};
   let portals: Portal[] = [];
   let teleports: Record<number, Record<number, Point>> = {};
+  let pm: Record<number, number> = [];
 
   let d: Dungeon = {
     lines,
@@ -72,7 +74,8 @@ const readInput = (): Dungeon => {
     start: { x: -1, y: -1 },
     end: { x: -1, y: -1 },
     teleports: {},
-    portals: []
+    portals: [],
+    pm: {}
   };
 
   for (let y = 0; y < lines.length; y++) {
@@ -109,6 +112,8 @@ const readInput = (): Dungeon => {
 
     portals.push([a, b]);
     portals.push([b, a]);
+    pm[portals.length - 1] = portals.length - 2;
+    pm[portals.length - 2] = portals.length - 1;
 
     teleports[a.x] = teleports[a.x] || {};
     teleports[a.x][a.y] = b;
@@ -117,6 +122,7 @@ const readInput = (): Dungeon => {
   }
   d.teleports = teleports;
   d.portals = portals;
+  d.pm = pm;
 
   return d;
 };
@@ -244,7 +250,14 @@ function solve(d: Dungeon) {
     else p = d.portals[idx][0];
 
     distances[idx] = findDistances(d, p);
+
+    if (idx >= 0) {
+      console.log(idx, d.pm[idx]);
+      distances[idx][d.pm[idx]] = 1;
+    }
   }
+
+  console.log(distances);
 
   let dist = shortest(distances, -2, -1, [], 0, { best: {} });
 
