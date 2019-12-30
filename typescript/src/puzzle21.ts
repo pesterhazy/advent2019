@@ -153,7 +153,8 @@ AND B T
 OR F T
 AND T J
 AND D J
-OR A J
+NOT A T
+OR T J
 RUN
 `;
 
