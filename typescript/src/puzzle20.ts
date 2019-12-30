@@ -214,10 +214,9 @@ const shortest = (
   ctx: Context
 ): number => {
   let hash = stringify(src);
-  console.log("***", hash);
   let options = edges[hash];
 
-  if (options == undefined) throw "Edge not found";
+  if (options == undefined) throw "Edge not found: " + hash;
 
   const results = options.map(e => {
     let newCost = cost + e.cost;
@@ -277,33 +276,31 @@ function solve(d: Dungeon) {
     if (level + 1 <= MAX_LEVEL) {
       for (let [src, dest] of d.down) {
         let cost = distances[label][src];
-        if (cost == undefined)
-          // unreachable
-          continue;
-        let next = { label: dest, level: level + 1 };
-        es.push({ node: next, cost: cost + 1 });
-        todo.push(next);
+        if (cost != undefined) {
+          let next = { label: dest, level: level + 1 };
+          es.push({ node: next, cost: cost + 1 });
+          todo.push(next);
+        }
       }
     }
     if (level - 1 >= 0) {
       for (let [src, dest] of d.up) {
         let cost = distances[label][src];
-        if (cost == undefined)
-          // unreachable
-          continue;
-        let next = { label: dest, level: level - 1 };
-        es.push({ node: next, cost: cost + 1 });
-        todo.push(next);
+        if (cost != undefined) {
+          let next = { label: dest, level: level - 1 };
+          es.push({ node: next, cost: cost + 1 });
+          todo.push(next);
+        }
       }
     }
 
     if (level === 0) {
       let cost = distances[label]["ZZ"];
-      if (cost == undefined)
+      if (cost != undefined) {
         // unreachable
-        continue;
-      let next = { label: "ZZ", level: 0 };
-      es.push({ node: next, cost });
+        let next = { label: "ZZ", level: 0 };
+        es.push({ node: next, cost });
+      }
     }
 
     edges[hash] = es;
@@ -311,6 +308,7 @@ function solve(d: Dungeon) {
   console.log(JSON.stringify(distances));
   console.log(JSON.stringify(edges, null, 2));
   let result = shortest(edges, { label: "AA", level: 0 }, [], 0, { best: {} });
+  console.log("result", result);
 }
 
 function solution() {
