@@ -125,10 +125,15 @@ function* gen(initialState: State) {
   }
 }
 
+const program = `
+NOT D J
+WALK
+`;
+
 function run(initialState: State) {
   let g = gen(initialState);
   let outBuf = "";
-  let inBuf = "NOT D J\nWALK\n";
+  let inBuf = program.replace(/^\n*/, "");
 
   let r = g.next();
   let i = 0;
@@ -142,7 +147,13 @@ function run(initialState: State) {
     if (r.done) break;
 
     if (r.value.type === "out") {
-      outBuf += String.fromCharCode(r.value.value as number);
+      let n = r.value.value as number;
+
+      if (n > 255) {
+        console.log("Damage:", n);
+      } else {
+        outBuf += String.fromCharCode(n);
+      }
       r = g.next();
     } else if (r.value.type === "in") {
       flush();
