@@ -238,26 +238,50 @@ interface Node {
   level: number;
 }
 
+interface Edge {
+  node: Node;
+  cost: number;
+}
+
+const stringify = (node: Node): string => `${node.label}:${node.level}`;
+
 function solve(d: Dungeon) {
-  let edges: Record<string, [Node, number][]> = {};
+  let edges: Record<string, Edge[]> = {};
 
   let todo: Node[] = [{ label: "AA", level: 0 }];
 
   while (todo.length > 0) {
     let node = todo.pop() as Node;
+    let hash = stringify(node);
+    if (edges[hash] != undefined) continue;
     let { label, level } = node;
-    let es: [Node, number][] = [];
+    let es: Edge[] = [];
     if (level + 1 <= MAX_LEVEL) {
       for (let [src, dest] of d.down) {
         let cost = 777;
         let next = { label: dest, level: level + 1 };
-        es.push([next, cost]);
+        es.push({ node: next, cost }); // FIXME: cost+1
         todo.push(next);
       }
-      edges[JSON.stringify(node)] = es;
     }
+    if (level - 1 >= 0) {
+      for (let [src, dest] of d.up) {
+        let cost = 777;
+        let next = { label: dest, level: level - 1 };
+        es.push({ node: next, cost }); // FIXME: cost+1
+        todo.push(next);
+      }
+    }
+
+    if (level === 0) {
+      let cost = 777;
+      let next = { label: "ZZ", level: 0 };
+      es.push({ node: next, cost }); // FIXME: cost+1
+    }
+
+    edges[hash] = es;
   }
-  console.log(edges);
+  console.log(JSON.stringify(edges, null, 2));
 }
 
 function solution() {
