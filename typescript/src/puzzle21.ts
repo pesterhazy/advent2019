@@ -125,18 +125,34 @@ function* gen(initialState: State) {
   }
 }
 
+// const program = `
+// // set T to true
+// NOT T T
+// AND A T
+// AND B T
+// AND C T
+// NOT T T
+// // set T to true if safe to jump
+// AND D T
+// // copy T to J
+// OR T J
+// // AND H J
+// RUN
+// `;
+
+// max 15 instructions
 const program = `
-// set T to true
-NOT T T
-AND A T
-AND B T
-AND C T
-NOT T T
-// set T to true if safe to jump
-AND D T
-// copy T to J
+NOT B T
+NOT F J
 OR T J
-WALK
+NOT E T
+NOT T T
+OR H T
+AND T J
+AND D J
+NOT A T
+OR T J
+RUN
 `;
 
 function run(initialState: State) {
