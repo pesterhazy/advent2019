@@ -142,16 +142,18 @@ function* gen(initialState: State) {
 
 // max 15 instructions
 const program = `
-NOT B T
-NOT F J
-OR T J
 NOT E T
+NOT H J
+AND T J
+NOT J J
+NOT C T
 NOT T T
-OR H T
+OR G T
+AND B T
+OR F T
 AND T J
 AND D J
-NOT A T
-OR T J
+OR A J
 RUN
 `;
 
