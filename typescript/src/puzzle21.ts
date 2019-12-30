@@ -126,14 +126,21 @@ function* gen(initialState: State) {
 }
 
 const program = `
-NOT D J
+NOT A J
+// NOT B T
+// AND T J
+// NOT C T
+// AND T J
+// AND D J
 WALK
 `;
 
 function run(initialState: State) {
   let g = gen(initialState);
   let outBuf = "";
-  let inBuf = program.replace(/^\n*/, "");
+  let inBuf = program.replace(/^\n*/, "").replace(/\/\/.*\n/g, "");
+
+  console.log(inBuf);
 
   let r = g.next();
   let i = 0;
