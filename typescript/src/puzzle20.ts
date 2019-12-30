@@ -25,7 +25,7 @@ const DELTA: Point[] = [
   { x: 1, y: 0 }
 ];
 
-const MAX_LEVEL = 1;
+const MAX_LEVEL = 5;
 
 const padd = (a: Point, b: Point): Point => ({ x: a.x + b.x, y: a.y + b.y });
 
@@ -114,8 +114,8 @@ const readInput = (): Dungeon => {
     if (ar.length !== 2) throw "oops length: " + ar.length;
 
     let [a, b]: [Point, Point] = ar as [Point, Point];
-    where[l + "_DOWN"] = a;
-    where[l + "_UP"] = b;
+    where[l + "_UP"] = a;
+    where[l + "_DOWN"] = b;
     down.push([l + "_DOWN", l + "_UP"]);
     up.push([l + "_UP", l + "_DOWN"]);
   }
@@ -147,7 +147,7 @@ const setLoc = (locMap: LocMap, p: Point, n: number) => {
 const findDistances = (
   d: Dungeon,
   src: Point,
-  dests: Point[]
+  dests: Record<string, Point>
 ): Record<string, number> => {
   let pos = src;
   let locMap: LocMap = {};
@@ -250,37 +250,66 @@ function solve(d: Dungeon) {
 
   let todo: Node[] = [{ label: "AA", level: 0 }];
 
+  let where = _.cloneDeep(d.where);
+  where["AA"] = d.start;
+  where["ZZ"] = d.end;
+  let distances: Record<string, Record<string, number>> = {};
+
+  for (let [label, pos] of Object.entries(where)) {
+    console.log(label, pos);
+    let dests: Record<string, Point> = {};
+    for (let [label2, pos2] of Object.entries(where)) {
+      if (label === label2) continue;
+
+      dests[label2] = pos2;
+    }
+    distances[label] = findDistances(d, pos, dests);
+  }
+
   while (todo.length > 0) {
     let node = todo.pop() as Node;
     let hash = stringify(node);
+    console.log("***", hash);
     if (edges[hash] != undefined) continue;
     let { label, level } = node;
     let es: Edge[] = [];
     if (level + 1 <= MAX_LEVEL) {
       for (let [src, dest] of d.down) {
-        let cost = 777;
+        let cost = distances[label][src];
+        console.log("DOWN", src, dest, cost);
+        if (cost == undefined)
+          // unreachable
+          continue;
         let next = { label: dest, level: level + 1 };
-        es.push({ node: next, cost }); // FIXME: cost+1
+        es.push({ node: next, cost: cost + 1 });
         todo.push(next);
       }
     }
     if (level - 1 >= 0) {
       for (let [src, dest] of d.up) {
-        let cost = 777;
+        let cost = distances[label][src];
+        console.log("UP", label, src, dest, cost);
+        if (cost == undefined)
+          // unreachable
+          continue;
         let next = { label: dest, level: level - 1 };
-        es.push({ node: next, cost }); // FIXME: cost+1
+        es.push({ node: next, cost: cost + 1 });
         todo.push(next);
       }
     }
 
     if (level === 0) {
-      let cost = 777;
+      let cost = distances[label]["ZZ"];
+      if (cost == undefined)
+        // unreachable
+        continue;
       let next = { label: "ZZ", level: 0 };
-      es.push({ node: next, cost }); // FIXME: cost+1
+      es.push({ node: next, cost });
     }
 
     edges[hash] = es;
   }
+  console.log(JSON.stringify(distances));
   console.log(JSON.stringify(edges, null, 2));
 }
 
