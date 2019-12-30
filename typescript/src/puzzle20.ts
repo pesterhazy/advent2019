@@ -203,31 +203,34 @@ type DistMap = Record<string, Record<string, number>>;
 // -1: end
 
 interface Context {
-  best: Record<number, number>;
+  best: Record<string, number>;
 }
 
 const shortest = (
-  distances: DistMap,
-  src: number,
-  dest: number,
-  seen: number[],
+  edges: Record<string, Edge[]>,
+  src: Node,
+  seen: string[],
   cost: number,
   ctx: Context
 ): number => {
-  let options = distances[src];
+  let hash = stringify(src);
+  console.log("***", hash);
+  let options = edges[hash];
 
-  const results = Object.entries(options).map(([hopStr, dist]) => {
-    let hop = parseInt(hopStr);
-    let newCost = cost + dist;
-    if (hop === -1) {
+  if (options == undefined) throw "Edge not found";
+
+  const results = options.map(e => {
+    let newCost = cost + e.cost;
+    if (e.node.label == "ZZ") {
       return newCost;
     }
-    if (seen.includes(hop)) return Infinity;
+    let nodeHash = stringify(e.node);
+    if (seen.includes(nodeHash)) return Infinity;
 
-    if (newCost >= ctx.best[hop]) return Infinity;
+    if (newCost >= ctx.best[nodeHash]) return Infinity;
 
-    ctx.best[hop] = newCost;
-    return shortest(distances, hop, dest, [...seen, hop], newCost, ctx);
+    ctx.best[nodeHash] = newCost;
+    return shortest(edges, e.node, [...seen, nodeHash], newCost, ctx);
   });
   // console.log(results);
   return Math.min(...results);
@@ -256,7 +259,6 @@ function solve(d: Dungeon) {
   let distances: Record<string, Record<string, number>> = {};
 
   for (let [label, pos] of Object.entries(where)) {
-    console.log(label, pos);
     let dests: Record<string, Point> = {};
     for (let [label2, pos2] of Object.entries(where)) {
       if (label === label2) continue;
@@ -269,14 +271,12 @@ function solve(d: Dungeon) {
   while (todo.length > 0) {
     let node = todo.pop() as Node;
     let hash = stringify(node);
-    console.log("***", hash);
     if (edges[hash] != undefined) continue;
     let { label, level } = node;
     let es: Edge[] = [];
     if (level + 1 <= MAX_LEVEL) {
       for (let [src, dest] of d.down) {
         let cost = distances[label][src];
-        console.log("DOWN", src, dest, cost);
         if (cost == undefined)
           // unreachable
           continue;
@@ -288,7 +288,6 @@ function solve(d: Dungeon) {
     if (level - 1 >= 0) {
       for (let [src, dest] of d.up) {
         let cost = distances[label][src];
-        console.log("UP", label, src, dest, cost);
         if (cost == undefined)
           // unreachable
           continue;
@@ -311,6 +310,7 @@ function solve(d: Dungeon) {
   }
   console.log(JSON.stringify(distances));
   console.log(JSON.stringify(edges, null, 2));
+  let result = shortest(edges, { label: "AA", level: 0 }, [], 0, { best: {} });
 }
 
 function solution() {
