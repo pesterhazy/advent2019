@@ -25,7 +25,7 @@ const DELTA: Point[] = [
   { x: 1, y: 0 }
 ];
 
-const MAX_LEVEL = 20;
+const MAX_LEVEL = 30;
 
 const padd = (a: Point, b: Point): Point => ({ x: a.x + b.x, y: a.y + b.y });
 
@@ -61,7 +61,7 @@ const label = (
 };
 
 const readInput = (): Dungeon => {
-  let lines = util.readLines("20-2.txt");
+  let lines = util.readLines("20.txt");
   let labels: Record<string, Point[]> = {};
   let where: Record<string, Point> = {};
   let up: [string, string][] = [];
@@ -305,15 +305,15 @@ function solve(d: Dungeon) {
 
     edges[hash] = es;
   }
-  console.log(JSON.stringify(distances));
-  console.log(JSON.stringify(edges, null, 2));
+  // console.log(JSON.stringify(distances));
+  // console.log(JSON.stringify(edges, null, 2));
   let result = shortest(edges, { label: "AA", level: 0 }, [], 0, { best: {} });
   console.log("result", result);
 }
 
 function solution() {
   let d = readInput();
-  console.log(d);
+  // console.log(d);
   solve(d);
 }
 
