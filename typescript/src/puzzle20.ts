@@ -7,8 +7,9 @@ interface Dungeon {
   height: number;
   start: Point;
   end: Point;
-  positions: Point[];
-  pm: Record<number, number | undefined>;
+  up: [string, string][];
+  down: [string, string][];
+  where: Record<string, Point>;
 }
 
 interface Point {
@@ -23,6 +24,8 @@ const DELTA: Point[] = [
   { x: -1, y: 0 },
   { x: 1, y: 0 }
 ];
+
+const MAX_LEVEL = 1;
 
 const padd = (a: Point, b: Point): Point => ({ x: a.x + b.x, y: a.y + b.y });
 
@@ -60,8 +63,9 @@ const label = (
 const readInput = (): Dungeon => {
   let lines = util.readLines("20-1.txt");
   let labels: Record<string, Point[]> = {};
-  let positions: Point[] = [];
-  let pm: Record<number, number | undefined> = [];
+  let where: Record<string, Point> = {};
+  let up: [string, string][] = [];
+  let down: [string, string][] = [];
 
   let d: Dungeon = {
     lines,
@@ -69,8 +73,9 @@ const readInput = (): Dungeon => {
     height: lines.length,
     start: { x: -1, y: -1 },
     end: { x: -1, y: -1 },
-    positions: [],
-    pm: {}
+    up: [],
+    down: [],
+    where: {}
   };
 
   for (let y = 0; y < lines.length; y++) {
@@ -96,39 +101,27 @@ const readInput = (): Dungeon => {
     }
   }
 
-  const MAX_LEVEL = 9;
-  const nlabels = Object.keys(labels).length;
-  for (let level = 0; level < MAX_LEVEL; level++) {
-    let idx = 0;
-    for (let [l, ar] of Object.entries(labels)) {
-      if (l === "AA") {
-        if (level === 0) {
-          d.start = ar[0];
-        }
-        continue;
-      }
-
-      if (l === "ZZ") {
-        if (level === 0) {
-          d.end = ar[0];
-        }
-        continue;
-      }
-      if (ar.length !== 2) throw "oops length: " + ar.length;
-      let [a, b]: [Point, Point] = ar as [Point, Point];
-
-      positions[level * nlabels + idx] = a;
-      positions[level * nlabels + idx + 1] = b;
-      pm[level * nlabels + idx] =
-        level === MAX_LEVEL ? undefined : (level + 1) * nlabels + (idx + 1);
-      pm[level * nlabels + (idx + 1)] =
-        level === 0 ? undefined : (level - 1) * nlabels + idx;
-
-      idx += 2;
+  for (let [l, ar] of Object.entries(labels)) {
+    if (l === "AA") {
+      d.start = ar[0];
+      continue;
     }
+
+    if (l === "ZZ") {
+      d.end = ar[0];
+      continue;
+    }
+    if (ar.length !== 2) throw "oops length: " + ar.length;
+
+    let [a, b]: [Point, Point] = ar as [Point, Point];
+    where[l + "_DOWN"] = a;
+    where[l + "_UP"] = b;
+    down.push([l + "_DOWN", l + "_UP"]);
+    up.push([l + "_UP", l + "_DOWN"]);
   }
-  d.positions = positions;
-  d.pm = pm;
+  d.up = up;
+  d.down = down;
+  d.where = where;
 
   return d;
 };
@@ -151,7 +144,11 @@ const setLoc = (locMap: LocMap, p: Point, n: number) => {
   locMap[p.x][p.y] = n;
 };
 
-const findDistances = (d: Dungeon, src: Point): Record<number, number> => {
+const findDistances = (
+  d: Dungeon,
+  src: Point,
+  dests: Point[]
+): Record<string, number> => {
   let pos = src;
   let locMap: LocMap = {};
   let path: Point[] = [];
@@ -188,25 +185,19 @@ const findDistances = (d: Dungeon, src: Point): Record<number, number> => {
       pos = path.pop() as Point;
     }
   }
-  let m: Record<number, number> = {};
-  for (let [idx, [a, b]] of d.portals.entries()) {
-    if (a.x === src.x && a.y === src.y) continue;
-    let dist = findLoc(locMap, a);
+  let m: Record<string, number> = {};
+  for (let [name, pos] of Object.entries(dests)) {
+    let dist;
+    if (pos.x === src.x && pos.y === src.y) dist = 0;
+    else dist = findLoc(locMap, pos);
     if (dist != undefined) {
-      m[idx] = dist;
-    }
-  }
-
-  {
-    let dist = findLoc(locMap, d.end);
-    if (dist != undefined) {
-      m[-1] = dist;
+      m[name] = dist;
     }
   }
   return m;
 };
 
-type DistMap = Record<number, Record<number, number>>;
+type DistMap = Record<string, Record<string, number>>;
 
 // -2: start
 // -1: end
@@ -242,31 +233,36 @@ const shortest = (
   return Math.min(...results);
 };
 
+interface Node {
+  label: string;
+  level: number;
+}
+
 function solve(d: Dungeon) {
-  let multiplier = d.portals.length;
-  let distances: DistMap = {}; // from, to -> dist
-  distances[-2] = findDistances(d, d.start);
+  let edges: Record<string, [Node, number][]> = {};
 
-  for (let level of _.range(10)) {
-    for (let idx of _.range(d.portals.length)) {
-      let p = d.portals[idx][0];
+  let todo: Node[] = [{ label: "AA", level: 0 }];
 
-      distances[level * multiplier + idx] = findDistances(d, p);
-      distances[level * multiplier + idx][d.pm[idx]] = 1;
+  while (todo.length > 0) {
+    let node = todo.pop() as Node;
+    let { label, level } = node;
+    let es: [Node, number][] = [];
+    if (level + 1 <= MAX_LEVEL) {
+      for (let [src, dest] of d.down) {
+        let cost = 777;
+        let next = { label: dest, level: level + 1 };
+        es.push([next, cost]);
+        todo.push(next);
+      }
+      edges[JSON.stringify(node)] = es;
     }
   }
-
-  console.log(distances);
-
-  let dist = shortest(distances, -2, -1, [], 0, { best: {} });
-
-  console.log("dist", dist);
+  console.log(edges);
 }
 
 function solution() {
   let d = readInput();
   console.log(d);
-  console.log("%j", d.portals);
   solve(d);
 }
 
