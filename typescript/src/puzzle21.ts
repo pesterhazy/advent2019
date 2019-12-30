@@ -126,12 +126,16 @@ function* gen(initialState: State) {
 }
 
 const program = `
-NOT A J
-// NOT B T
-// AND T J
-// NOT C T
-// AND T J
-// AND D J
+// set T to true
+NOT T T
+AND A T
+AND B T
+AND C T
+NOT T T
+// set T to true if safe to jump
+AND D T
+// copy T to J
+OR T J
 WALK
 `;
 
@@ -166,7 +170,6 @@ function run(initialState: State) {
       flush();
       if (i >= inBuf.length) throw "inBuf empty";
 
-      console.log("=>", inBuf.charCodeAt(i));
       r = g.next(inBuf.charCodeAt(i));
       i++;
     }
