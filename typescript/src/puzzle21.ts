@@ -154,7 +154,7 @@ OR F T
 AND T J
 AND D J
 NOT A T
-OR T J
+OR T T
 RUN
 `;
 
