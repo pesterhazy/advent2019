@@ -125,20 +125,14 @@ function* gen(initialState: State) {
   }
 }
 
-// const program = `
-// // set T to true
-// NOT T T
-// AND A T
-// AND B T
-// AND C T
-// NOT T T
-// // set T to true if safe to jump
-// AND D T
-// // copy T to J
-// OR T J
-// // AND H J
-// RUN
-// `;
+/*
+
+(or (not a)
+    (and d
+         (not (and (not e) (not h)))
+         (not (or (and b (or c g)) f))))
+
+*/
 
 // max 15 instructions
 const program = `
@@ -146,13 +140,18 @@ NOT E T
 NOT H J
 AND T J
 NOT J J
+
 NOT C T
 NOT T T
 OR G T
 AND B T
 OR F T
+NOT T T
+
 AND T J
+
 AND D J
+
 NOT A T
 OR T J
 RUN
@@ -161,7 +160,10 @@ RUN
 function run(initialState: State) {
   let g = gen(initialState);
   let outBuf = "";
-  let inBuf = program.replace(/^\n*/, "").replace(/\/\/.*\n/g, "");
+  let inBuf = program
+    .replace(/^\n*/, "")
+    .replace(/\/\/.*\n/g, "")
+    .replace(/^\s*\n/gm, "");
 
   console.log(inBuf);
 
