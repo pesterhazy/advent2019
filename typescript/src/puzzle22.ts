@@ -53,7 +53,7 @@ function mod(n: number, m: number) {
 
 const calc = (i: number, { tag, v }: Step) => {
   if (tag === Tag.New) {
-    return N - i;
+    return N - 1 - i;
   }
   if (tag === Tag.Cut) {
     if (v == undefined) throw "Missing v";
