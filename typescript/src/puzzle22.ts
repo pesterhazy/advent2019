@@ -16,7 +16,7 @@ interface Step {
 type Stack = number[];
 
 const readInput = (): Step[] =>
-  util.readLines("22-1.txt").map(l => {
+  util.readLines("22.txt").map(l => {
     let matches = l.match(/-?\d+/g);
     if (l.match(/deal into new stack/)) return { tag: Tag.New };
     if (l.match(/deal with increment/))
@@ -57,17 +57,18 @@ const calc = (i: number, { tag, v }: Step) => {
   }
   if (tag === Tag.Cut) {
     if (v == undefined) throw "Missing v";
-    return mod(i + v, N);
+    return mod(i - v, N);
   }
   if (tag === Tag.Inc) {
     if (v == undefined) throw "Missing v";
-    return N - i;
+    return mod(i * v, N);
   }
   throw "Unknown tag";
 };
 
-// const N = 10007;
-const N = 10;
+const N = 10007;
+const NEEDLE = 2019;
+// const N = 10;
 
 function solution() {
   let input = readInput();
@@ -78,13 +79,12 @@ function solution() {
     stack = next(stack, step);
     if (stack.length != N) throw "oops";
   }
-  // console.log(
-  //   "n=2019",
-  //   _.findIndex(stack, n => n == 2019)
-  // );
-  console.log(stack);
-  let result = _.range(N).map(i => input.reduce(calc, i));
-  console.log(result);
+  console.log(
+    "n=2019",
+    _.findIndex(stack, n => n == NEEDLE)
+  );
+  console.log("faster", input.reduce(calc, NEEDLE));
+  // let result = _.range(N).map(i => input.reduce(calc, i));
 }
 
 export default solution;
