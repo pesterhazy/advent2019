@@ -52,13 +52,14 @@ const peek = (tower: Tower, { x, y, level }: Coord): boolean => {
   }
   if (x < 0 || y < 0 || x >= maze[0].length || y >= maze.length)
     throw "Out of bounds";
+  if (x === 2 && y === 2) throw "Out of bounds: center";
   return maze[y][x];
 };
 
 const step = (tower: Tower) => {
   let newTower = new Map();
 
-  let levels = tower.keys();
+  let levels = Array.from(tower.keys());
   let minLevel = Math.min(...levels) - 1;
   let maxLevel = Math.max(...levels) + 1;
 
@@ -84,7 +85,7 @@ const step = (tower: Tower) => {
         let newv: boolean;
         if (peek(tower, { x, y, level })) newv = n === 1;
         else newv = n === 1 || n === 2;
-        newv = newMaze[y][x];
+        newMaze[y][x] = newv;
 
         if (newv) isEmpty = false;
       }
@@ -113,13 +114,16 @@ const count = (tower: Tower) => {
   return result;
 };
 
+const NUM_ITERATIONS = 10;
+
 function solution() {
   let tower: Tower = new Map();
   tower.set(0, readInput());
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < NUM_ITERATIONS; i++) {
+    console.log("levels:", Array.from(tower.keys()));
     let n = count(tower);
-    console.log("=>", n);
+    console.log("count:", n);
 
     tower = step(tower);
   }
