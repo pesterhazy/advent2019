@@ -7,14 +7,10 @@ const readInput = (): Maze =>
   util.readLines("24.txt").map(l => Array.from(l).map(ch => ch === "#"));
 
 const neighbors: [number, number][] = [
-  [-1, -1],
   [-1, 0],
-  [-1, 1],
-  [0, -1],
-  [0, 1],
-  [1, -1],
   [1, 0],
-  [1, 1]
+  [0, 1],
+  [0, -1]
 ];
 
 const peek = (maze: Maze, x: number, y: number): boolean | undefined => {
