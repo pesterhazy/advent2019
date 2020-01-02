@@ -61,19 +61,16 @@ const hash = (maze: Maze) => {
 
 function solution() {
   let maze = readInput();
-  print(maze);
-
-  console.log();
-
   let seen = new Set();
 
   while (true) {
+    print(maze);
     let h = hash(maze);
-    console.log(h);
+    console.log("=>", h);
 
     if (seen.has(h)) break;
-
     seen.add(h);
+
     maze = step(maze);
   }
 }
