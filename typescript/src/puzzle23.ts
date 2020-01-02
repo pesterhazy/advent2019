@@ -130,6 +130,7 @@ interface System {
   g: any;
   r: any;
   q: Point[];
+  idleCount: number;
 }
 
 interface Point {
@@ -166,34 +167,44 @@ const isWaiting = (s: System) => s.r.value.type === "in";
 function run(initialState: State) {
   let systems = _.range(N).map((n: number) => {
     let g = gen(initialState);
-    let system: System = { g: g, r: g.next(), n: n, q: [] };
+    let system: System = { g: g, r: g.next(), n: n, q: [], idleCount: 0 };
     putVal(system, n);
     return system;
   });
 
+  let nat = undefined;
+
   for (let n of _.range(100)) {
+    console.log(n);
+    if (_.every(systems, s => s.idleCount > 2)) {
+      throw "All idle";
+    }
     for (let system of systems) {
       if (isWaiting(system)) {
         if (system.q.length > 0) {
           let point: Point = system.q.shift()!;
           putVal(system, point.x);
           putVal(system, point.y);
+          system.idleCount = 0;
         } else {
           putVal(system, -1); // empty queue
+          system.idleCount++;
         }
       } else {
         let dest = getVal(system);
         let x = getVal(system);
         let y = getVal(system);
         if (dest === 255) {
-          console.log("result", { x, y });
-          return;
+          nat = { x, y };
+          console.log("nat", nat);
+        } else {
+          if (dest < 0 || dest > N) {
+            throw "dest out of range: " + dest;
+          }
+          console.log([dest, x, y]);
+          systems[dest].q.push({ x, y });
         }
-        if (dest < 0 || dest > N) {
-          throw "dest out of range: " + dest;
-        }
-        console.log([dest, x, y]);
-        systems[dest].q.push({ x, y });
+        system.idleCount = 0;
       }
     }
   }
