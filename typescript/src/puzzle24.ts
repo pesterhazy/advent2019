@@ -5,7 +5,7 @@ type Maze = boolean[][];
 type Tower = Map<number, Maze>;
 
 const readInput = (): Maze =>
-  util.readLines("24.txt").map(l => Array.from(l).map(ch => ch === "#"));
+  util.readLines("24-1.txt").map(l => Array.from(l).map(ch => ch === "#"));
 
 const neighbors: [number, number][] = [
   [-1, 0],
@@ -58,39 +58,38 @@ const peek = (tower: Tower, { x, y, level }: Coord): boolean => {
 const step = (tower: Tower) => {
   let newTower = new Map();
 
-  let q = [0];
+  let levels = tower.keys();
+  let minLevel = Math.min(...levels) - 1;
+  let maxLevel = Math.max(...levels) + 1;
 
-  while (q.length > 0) {
-    let level = q.shift()!;
-    const maze: Maze | undefined = tower.get(level);
-    if (maze == undefined) {
-      throw "Maze not found";
-    } else {
-      let newMaze: Maze = new Array(SIZE)
-        .fill(false)
-        .map(() => new Array(SIZE).fill(false));
+  for (let level = minLevel; level <= maxLevel; level++) {
+    let newMaze: Maze = new Array(SIZE)
+      .fill(false)
+      .map(() => new Array(SIZE).fill(false));
 
-      for (let y = 0; y < maze.length; y++) {
-        for (let x = 0; x < maze[0].length; x++) {
-          if (y === 2 && x === 2) continue;
+    let isEmpty = true;
+    for (let y = 0; y < SIZE; y++) {
+      for (let x = 0; x < SIZE; x++) {
+        if (y === 2 && x === 2) continue; // FIXME
 
-          let n = findNeighbors({ x, y, level })
-            .map((coord: Coord) => {
-              return peek(tower, coord);
-            })
-            .reduce(
-              (acc: number, b: boolean | undefined): number =>
-                b ? acc + 1 : acc,
-              0
-            );
-          if (maze[y][x]) newMaze[y][x] = n === 1;
-          else newMaze[y][x] = n === 1 || n === 2;
-        }
+        let n = findNeighbors({ x, y, level })
+          .map((coord: Coord) => {
+            return peek(tower, coord);
+          })
+          .reduce(
+            (acc: number, b: boolean | undefined): number =>
+              b ? acc + 1 : acc,
+            0
+          );
+        let newv: boolean;
+        if (peek(tower, { x, y, level })) newv = n === 1;
+        else newv = n === 1 || n === 2;
+        newv = newMaze[y][x];
+
+        if (newv) isEmpty = false;
       }
     }
-    // FIXME: add to newTower
-    // FIXME: consider 4 outer neighbors
-    // FIXME: consider inner neighbor
+    if (!isEmpty) newTower.set(level, newMaze);
   }
 
   return newTower;
@@ -102,13 +101,13 @@ const print = (maze: Maze) => {
   );
 };
 
-const hash = (maze: Maze) => {
-  let m = 1;
+const count = (tower: Tower) => {
   let result = 0;
-  for (let y = 0; y < maze.length; y++) {
-    for (let x = 0; x < maze[0].length; x++) {
-      result += maze[y][x] ? m : 0;
-      m *= 2;
+  for (let maze of tower.values()) {
+    for (let y = 0; y < maze.length; y++) {
+      for (let x = 0; x < maze[0].length; x++) {
+        result += maze[y][x] ? 1 : 0;
+      }
     }
   }
   return result;
@@ -118,18 +117,12 @@ function solution() {
   let tower: Tower = new Map();
   tower.set(0, readInput());
 
-  // let seen = new Set();
+  for (let i = 0; i < 10; i++) {
+    let n = count(tower);
+    console.log("=>", n);
 
-  // while (true) {
-  //   print(maze);
-  //   let h = hash(maze);
-  //   console.log("=>", h);
-
-  //   if (seen.has(h)) break;
-  //   seen.add(h);
-
-  //   maze = step(maze);
-  // }
+    tower = step(tower);
+  }
 }
 
 export default solution;
