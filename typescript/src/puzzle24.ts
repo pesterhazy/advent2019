@@ -47,14 +47,35 @@ const print = (maze: Maze) => {
   );
 };
 
+const hash = (maze: Maze) => {
+  let m = 1;
+  let result = 0;
+  for (let y = 0; y < maze.length; y++) {
+    for (let x = 0; x < maze[0].length; x++) {
+      result += maze[y][x] ? m : 0;
+      m *= 2;
+    }
+  }
+  return result;
+};
+
 function solution() {
   let maze = readInput();
   print(maze);
 
   console.log();
 
-  maze = step(maze);
-  print(maze);
+  let seen = new Set();
+
+  while (true) {
+    let h = hash(maze);
+    console.log(h);
+
+    if (seen.has(h)) break;
+
+    seen.add(h);
+    maze = step(maze);
+  }
 }
 
 export default solution;
