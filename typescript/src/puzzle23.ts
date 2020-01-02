@@ -183,15 +183,15 @@ function run(initialState: State) {
         }
       } else {
         let dest = getVal(system);
+        let x = getVal(system);
+        let y = getVal(system);
         if (dest === 255) {
-          console.log("result", getVal(system));
+          console.log("result", { x, y });
           return;
         }
         if (dest < 0 || dest > N) {
           throw "dest out of range: " + dest;
         }
-        let x = getVal(system);
-        let y = getVal(system);
         console.log([dest, x, y]);
         systems[dest].q.push({ x, y });
       }
