@@ -6,12 +6,36 @@ type Maze = boolean[][];
 const readInput = (): Maze =>
   util.readLines("24.txt").map(l => Array.from(l).map(ch => ch === "#"));
 
+const neighbors: [number, number][] = [
+  [-1, -1],
+  [-1, 0],
+  [-1, 1],
+  [0, -1],
+  [0, 1],
+  [1, -1],
+  [1, 0],
+  [1, 1]
+];
+
+const peek = (maze: Maze, x: number, y: number): boolean | undefined => {
+  if (x < 0 || y < 0 || x >= maze[0].length || y >= maze.length)
+    return undefined;
+  else return maze[y][x];
+};
+
 const step = (maze: Maze) => {
   let newMaze: Maze = _.cloneDeep(maze);
 
   for (let y = 0; y < maze.length; y++) {
     for (let x = 0; x < maze[0].length; x++) {
-      newMaze[y][x] = maze[y][x];
+      let n = neighbors
+        .map(([dx, dy]) => peek(maze, x + dx, y + dy))
+        .reduce(
+          (acc: number, b: boolean | undefined): number => (b ? acc + 1 : acc),
+          0
+        );
+      if (maze[y][x]) newMaze[y][x] = n === 1;
+      else newMaze[y][x] = n === 1 || n === 2;
     }
   }
   return newMaze;
