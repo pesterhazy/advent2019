@@ -173,15 +173,20 @@ function run(initialState: State) {
   });
 
   let nat = undefined;
+  let lastNat = undefined;
 
-  for (let n of _.range(100)) {
-    console.log(n);
+  for (let n of _.range(1000)) {
     if (_.every(systems, s => s.idleCount > 2)) {
       if (nat == undefined) throw "No nat";
 
-      console.log("Idle, sending keep-alive");
+      if (lastNat && nat.y === lastNat.y) {
+        console.log("y:", nat.y);
+        return;
+      }
       putVal(systems[0], nat.x);
       putVal(systems[0], nat.y);
+
+      lastNat = nat;
       for (let system of systems) {
         system.idleCount = 0;
       }
