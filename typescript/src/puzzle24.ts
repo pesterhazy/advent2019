@@ -5,7 +5,7 @@ type Maze = boolean[][];
 type Tower = Map<number, Maze>;
 
 const readInput = (): Maze =>
-  util.readLines("24-1.txt").map(l => Array.from(l).map(ch => ch === "#"));
+  util.readLines("24.txt").map(l => Array.from(l).map(ch => ch === "#"));
 
 const neighbors: [number, number][] = [
   [-1, 0],
@@ -114,19 +114,17 @@ const count = (tower: Tower) => {
   return result;
 };
 
-const NUM_ITERATIONS = 10;
+const NUM_ITERATIONS = 200;
 
 function solution() {
   let tower: Tower = new Map();
   tower.set(0, readInput());
 
   for (let i = 0; i < NUM_ITERATIONS; i++) {
-    console.log("levels:", Array.from(tower.keys()));
-    let n = count(tower);
-    console.log("count:", n);
-
     tower = step(tower);
   }
+  let n = count(tower);
+  console.log("count:", n);
 }
 
 export default solution;
