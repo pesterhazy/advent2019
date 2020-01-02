@@ -20,21 +20,42 @@ const peek = (maze: Maze, x: number, y: number): boolean | undefined => {
   else return maze[y][x];
 };
 
-const step = (maze: Maze) => {
-  let newMaze: Maze = _.cloneDeep(maze);
+const step = (tower: Tower) => {
+  let newTower = new Map();
 
-  for (let y = 0; y < maze.length; y++) {
-    for (let x = 0; x < maze[0].length; x++) {
-      let n = neighbors
-        .map(([dx, dy]) => peek(maze, x + dx, y + dy))
-        .reduce(
-          (acc: number, b: boolean | undefined): number => (b ? acc + 1 : acc),
-          0
-        );
-      if (maze[y][x]) newMaze[y][x] = n === 1;
-      else newMaze[y][x] = n === 1 || n === 2;
+  let q = [0];
+
+  while (q.length > 0) {
+    let level = q.shift()!;
+    const maze: Maze | undefined = tower.get(level);
+    if (maze == undefined) {
+      throw "Maze not found";
+    } else {
+      let newMaze: Maze = _.cloneDeep(maze);
+
+      for (let y = 0; y < maze.length; y++) {
+        for (let x = 0; x < maze[0].length; x++) {
+          if (y === 2 && x === 2) continue;
+
+          // FIXME: update peek
+
+          let n = neighbors
+            .map(([dx, dy]) => peek(maze, x + dx, y + dy))
+            .reduce(
+              (acc: number, b: boolean | undefined): number =>
+                b ? acc + 1 : acc,
+              0
+            );
+          if (maze[y][x]) newMaze[y][x] = n === 1;
+          else newMaze[y][x] = n === 1 || n === 2;
+        }
+      }
     }
+    // FIXME: add to newTower
+    // FIXME: consider 4 outer neighbors
+    // FIXME: consider inner neighbor
   }
+
   return newMaze;
 };
 
