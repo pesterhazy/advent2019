@@ -2,6 +2,7 @@ import * as util from "./util";
 import * as _ from "lodash";
 
 type Maze = boolean[][];
+type Tower = Map<number, Maze>;
 
 const readInput = (): Maze =>
   util.readLines("24.txt").map(l => Array.from(l).map(ch => ch === "#"));
@@ -56,19 +57,21 @@ const hash = (maze: Maze) => {
 };
 
 function solution() {
-  let maze = readInput();
-  let seen = new Set();
+  let tower: Tower = new Map();
+  tower.set(0, readInput());
 
-  while (true) {
-    print(maze);
-    let h = hash(maze);
-    console.log("=>", h);
+  // let seen = new Set();
 
-    if (seen.has(h)) break;
-    seen.add(h);
+  // while (true) {
+  //   print(maze);
+  //   let h = hash(maze);
+  //   console.log("=>", h);
 
-    maze = step(maze);
-  }
+  //   if (seen.has(h)) break;
+  //   seen.add(h);
+
+  //   maze = step(maze);
+  // }
 }
 
 export default solution;
