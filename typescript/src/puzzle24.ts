@@ -14,6 +14,37 @@ const neighbors: [number, number][] = [
   [0, -1]
 ];
 
+interface Coord {
+  x: number;
+  y: number;
+  level: number;
+}
+
+const SIZE = 5;
+const CENTER = 2;
+
+const findNeighbors = ({ x, y, level }: Coord): Coord[] =>
+  neighbors.flatMap(([dx, dy]) => {
+    let nx = x + dx;
+    let ny = y + dy;
+
+    if (nx >= SIZE) return [{ level: level - 1, x: CENTER + 1, y: CENTER }];
+    if (ny >= SIZE) return [{ level: level - 1, x: CENTER, y: CENTER + 1 }];
+    if (nx < 0) return [{ level: level - 1, x: CENTER - 1, y: CENTER }];
+    if (ny < 0) return [{ level: level - 1, x: CENTER, y: CENTER - 1 }];
+
+    if (nx === CENTER && ny === CENTER) {
+      return _.range(SIZE).map(i => {
+        if (dx > 0) return { level: level + 1, x: 0, y: i };
+        if (dx < 0) return { level: level + 1, x: SIZE - 1, y: i };
+        if (dy > 0) return { level: level + 1, x: i, y: 0 };
+        if (dy < 0) return { level: level + 1, x: i, y: SIZE - 1 };
+        throw "unreachable";
+      });
+    }
+    return [{ x: x + dx, y: y + dy, level }];
+  });
+
 const peek = (maze: Maze, x: number, y: number): boolean | undefined => {
   if (x < 0 || y < 0 || x >= maze[0].length || y >= maze.length)
     return undefined;
@@ -56,7 +87,7 @@ const step = (tower: Tower) => {
     // FIXME: consider inner neighbor
   }
 
-  return newMaze;
+  return newTower;
 };
 
 const print = (maze: Maze) => {
