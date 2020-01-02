@@ -45,10 +45,14 @@ const findNeighbors = ({ x, y, level }: Coord): Coord[] =>
     return [{ x: x + dx, y: y + dy, level }];
   });
 
-const peek = (maze: Maze, x: number, y: number): boolean | undefined => {
+const peek = (tower: Tower, { x, y, level }: Coord): boolean => {
+  let maze = tower.get(level);
+  if (!maze) {
+    return false;
+  }
   if (x < 0 || y < 0 || x >= maze[0].length || y >= maze.length)
-    return undefined;
-  else return maze[y][x];
+    throw "Out of bounds";
+  return maze[y][x];
 };
 
 const step = (tower: Tower) => {
@@ -62,16 +66,18 @@ const step = (tower: Tower) => {
     if (maze == undefined) {
       throw "Maze not found";
     } else {
-      let newMaze: Maze = _.cloneDeep(maze);
+      let newMaze: Maze = new Array(SIZE)
+        .fill(false)
+        .map(() => new Array(SIZE).fill(false));
 
       for (let y = 0; y < maze.length; y++) {
         for (let x = 0; x < maze[0].length; x++) {
           if (y === 2 && x === 2) continue;
 
-          // FIXME: update peek
-
-          let n = neighbors
-            .map(([dx, dy]) => peek(maze, x + dx, y + dy))
+          let n = findNeighbors({ x, y, level })
+            .map((coord: Coord) => {
+              return peek(tower, coord);
+            })
             .reduce(
               (acc: number, b: boolean | undefined): number =>
                 b ? acc + 1 : acc,
