@@ -177,7 +177,14 @@ function run(initialState: State) {
   for (let n of _.range(100)) {
     console.log(n);
     if (_.every(systems, s => s.idleCount > 2)) {
-      throw "All idle";
+      if (nat == undefined) throw "No nat";
+
+      console.log("Idle, sending keep-alive");
+      putVal(systems[0], nat.x);
+      putVal(systems[0], nat.y);
+      for (let system of systems) {
+        system.idleCount = 0;
+      }
     }
     for (let system of systems) {
       if (isWaiting(system)) {
