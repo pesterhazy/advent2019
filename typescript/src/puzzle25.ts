@@ -151,9 +151,63 @@ const getVal = (s: System) => {
 
 const isWaiting = (s: System) => s.r.value.type === "in";
 
+const DIR: Record<string, [number, number]> = {
+  north: [0, -1],
+  south: [0, 1],
+  west: [-1, 0],
+  east: [1, 0]
+};
+
 async function run(initialState: State) {
   let g = gen(initialState);
   let system: System = { g: g, r: g.next() };
+  let m: Map<number, Map<number, string>> = new Map();
+  let pos: [number, number] = [0, 0];
+
+  const flush = () => {
+    console.log(inBuf);
+    inBuf = "";
+  };
+
+  const updateMap = ([x, y]: [number, number]) => {
+    let mm = m.get(y);
+    if (!mm) {
+      mm = new Map();
+      m.set(y, mm);
+    }
+    mm.set(x, ".");
+  };
+
+  const printMap = () => {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (let [y, row] of m.entries()) {
+      for (let x of row.keys()) {
+        minX = Math.min(minX, x);
+        maxX = Math.max(maxX, x);
+      }
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+    }
+
+    for (let y = minY; y <= maxY; y++) {
+      let line = "";
+      let mm = m.get(y);
+      for (let x = minX; x <= maxX; x++) {
+        let ch: string;
+        if (x === pos[0] && y === pos[1]) ch = "@";
+        else if (mm) {
+          let r = mm.get(x);
+          if (r == undefined) ch = " ";
+          else ch = r;
+        } else ch = " ";
+        line += ch;
+      }
+      console.log(line);
+    }
+  };
 
   const rl = readline.createInterface({
     input: process.stdin
@@ -162,17 +216,24 @@ async function run(initialState: State) {
   let it = rl[Symbol.asyncIterator]();
   let inBuf = "";
   while (true) {
+    if (system.r.done) break;
+
     if (isWaiting(system)) {
       let line = await it.next();
 
       for (let ch of line.value + "\n") {
         putVal(system, ch.charCodeAt(0));
       }
+      if (DIR[line.value]) {
+        pos[0] += DIR[line.value][0];
+        pos[1] += DIR[line.value][1];
+        updateMap(pos);
+        printMap();
+      }
     } else {
       let ch = String.fromCharCode(getVal(system));
       if (ch === "\n") {
-        console.log(inBuf);
-        inBuf = "";
+        flush();
       } else {
         inBuf += ch;
       }
