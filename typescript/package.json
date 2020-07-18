@@ -24,7 +24,7 @@
     "@types/ramda": "^0.26.36",
     "@types/readline-sync": "^1.4.3",
     "chai": "^4.2.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "mathjs": "^6.2.5",
     "ramda": "^0.26.1",
     "readline-sync": "^1.4.10"
